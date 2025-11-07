@@ -4,8 +4,11 @@ import 'package:args/args.dart';
 import 'package:github_reporter/github_reporter.dart';
 
 import 'package:github_reporter/src/services/github_service.dart';
+import 'package:logging/logging.dart';
 
 void main(List<String> arguments) async {
+  final log = Logger('main');
+
   final parser = ArgParser()
     ..addOption('repo', help: 'The GitHub repository in the format owner/repo.')
     ..addOption(
@@ -32,13 +35,27 @@ void main(List<String> arguments) async {
   try {
     final results = parser.parse(arguments);
 
+    final verbose = results['verbose'] as bool;
+
+    Logger.root.level = verbose ? Level.ALL : Level.SEVERE;
+
+    Logger.root.onRecord.listen((record) {
+      final message =
+          '[${record.level.name}] ${record.time}: ${record.message}';
+      if (record.error != null) {
+        stderr.writeln(
+          '$message\nError: ${record.error}\nStack: ${record.stackTrace}',
+        );
+      } else {
+        stderr.writeln(message);
+      }
+    });
+
     if (results['help']) {
       print(
         'A command-line tool to generate a summary report of GitHub '
-        'repository activity using GitHub and Gemini APIs.',
-      );
-      print(
-        '\nUsage: dart run github_reporter.dart --repo <owner/repo> '
+        'repository activity using GitHub and Gemini APIs.\n\n'
+        'Usage: dart run github_reporter.dart --repo <owner/repo> '
         '--github-token <YOUR_GITHUB_PAT> --gemini-key <YOUR_GEMINI_API_KEY> '
         '[--start-date <YYYY-MM-DD>] [--end-date <YYYY-MM-DD>] '
         '[--exclude-author <GITHUB_HANDLE>]\n',
@@ -87,7 +104,6 @@ void main(List<String> arguments) async {
         ? DateTime.parse(results['end-date'])
         : _getDefaultEndDate();
 
-    final verbose = results['verbose'] as bool;
     final outputFile = results['output-file'] as String?;
     final excludeAuthors = results['exclude-author'] as List<String>;
 
@@ -102,7 +118,6 @@ void main(List<String> arguments) async {
     final generator = ReportGenerator.withTokens(
       githubToken: githubToken,
       geminiApiKey: geminiApiKey,
-      verbose: verbose,
     );
 
     final report = await generator.generateReport(
@@ -115,27 +130,26 @@ void main(List<String> arguments) async {
 
     if (outputFile != null) {
       await File(outputFile).writeAsString(report);
-      if (verbose) {
-        stderr.writeln('Report written to $outputFile');
-      }
+      log.info('Report written to $outputFile');
     } else {
       print(report);
     }
   } on RateLimitException catch (e) {
-    stderr.writeln(e.message);
+    log.severe(e.message);
     exit(1);
   } catch (e) {
-    stderr.writeln(e);
+    log.severe(e);
     exit(1);
   }
 }
 
 DateTime _getDefaultStartDate() {
   final now = DateTime.now();
-  if (now.weekday == DateTime.monday) {
-    return now.subtract(const Duration(days: 3));
-  }
-  return now.subtract(const Duration(days: 1));
+  return switch (now.weekday) {
+    DateTime.monday => now.subtract(Duration(days: 3)),
+    DateTime.sunday => now.subtract(Duration(days: 2)),
+    _ => now.subtract(Duration(days: 1)),
+  };
 }
 
 DateTime _getDefaultEndDate() {

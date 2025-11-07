@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:github/github.dart';
+import 'package:logging/logging.dart';
 
 /// An exception that is thrown when the GitHub API rate limit is exceeded.
 class RateLimitException implements Exception {
@@ -16,17 +16,14 @@ class RateLimitException implements Exception {
 /// A service that interacts with the GitHub API.
 class GitHubService {
   final GitHub _github;
-  final bool _verbose;
+  final _log = Logger('GitHubService');
 
   /// Creates a new instance of [GitHubService].
-  GitHubService(this._github, {bool verbose = false}) : _verbose = verbose;
+  GitHubService(this._github, {bool verbose = false});
 
   /// Creates a new instance of [GitHubService] using a GitHub token.
-  factory GitHubService.withToken(String token, {bool verbose = false}) {
-    return GitHubService(
-      GitHub(auth: Authentication.withToken(token)),
-      verbose: verbose,
-    );
+  factory GitHubService.withToken(String token) {
+    return GitHubService(GitHub(auth: Authentication.withToken(token)));
   }
 
   /// Gets a list of merged pull requests for a given repository and date range.
@@ -38,30 +35,29 @@ class GitHubService {
     List<String> excludeAuthors = const [],
   }) async {
     try {
-      var query = 'repo:$owner/$repo is:pr is:merged '
+      var query =
+          'repo:$owner/$repo is:pr is:merged '
           'merged:${_formatDate(startDate)}..${_formatDate(endDate)}';
 
       for (final author in excludeAuthors) {
         query += ' -author:$author';
       }
-      if (_verbose) {
-        stderr.writeln(
-          'Making GitHub API request: search issues with query "$query"',
-        );
-      }
-      final searchResult = await _github.search.issues(query).toList();
 
+      _log.info('Making GitHub API request: search issues with query "$query"');
+
+      final searchResult = await _github.search.issues(query).toList();
       final pullRequests = <PullRequest>[];
+
       for (final issue in searchResult) {
-        if (_verbose) {
-          stderr.writeln(
-            'Making GitHub API request: get pull request #${issue.number}',
-          );
-        }
+        _log.info(
+          'Making GitHub API request: get pull request #${issue.number}',
+        );
+
         final pr = await _github.pullRequests.get(
           RepositorySlug(owner, repo),
           issue.number,
         );
+
         pullRequests.add(pr);
       }
 
@@ -82,11 +78,9 @@ class GitHubService {
     required int number,
   }) async {
     try {
-      if (_verbose) {
-        stderr.writeln(
-          'Making GitHub API request: get diff for PR #$number in $owner/$repo',
-        );
-      }
+      _log.info(
+        'Making GitHub API request: get diff for PR #$number in $owner/$repo',
+      );
       final httpClient = _github.client;
       final response = await httpClient.get(
         Uri.parse('https://api.github.com/repos/$owner/$repo/pulls/$number'),

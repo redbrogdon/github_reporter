@@ -42,19 +42,27 @@ Dedicated service classes will encapsulate interactions with external APIs. Thei
 
 ## 4. Error Handling
 
-Upon encountering critical errors, such as invalid API keys, network failures, or other unrecoverable issues, the application will exit gracefully and print a descriptive error message to `stderr`.
+Upon encountering critical errors, such as invalid API keys, network failures, or other unrecoverable issues, the application will log a descriptive error message and exit gracefully.
 
 ### 4.1. GitHub API Rate Limit Handling
 
-To handle GitHub API rate limit errors, a custom exception class, `RateLimitException`, will be defined. When the `GitHubService` encounters a `RateLimitHit` exception from the `github` package, it will catch it and re-throw it as a `RateLimitException`. The main entry point in `bin/github_reporter.dart` will have a `try-catch` block to handle this specific exception. If a `RateLimitException` is caught, a user-friendly error message will be logged to `stderr`, and the application will exit with a non-zero status code. This ensures that the application does not attempt to proceed with generating a report when the rate limit has been exceeded.
+To handle GitHub API rate limit errors, a custom exception class, `RateLimitException`, will be defined. When the `GitHubService` encounters a `RateLimitHit` exception from the `github` package, it will catch it and re-throw it as a `RateLimitException`. The main entry point in `bin/github_reporter.dart` will have a `try-catch` block to handle this specific exception. If a `RateLimitException` is caught, a user-friendly error message will be logged, and the application will exit with a non-zero status code. This ensures that the application does not attempt to proceed with generating a report when the rate limit has been exceeded.
 
-## 5. Data Models
+## 5. Logging
+
+The application uses the `package:logging` library for all output. This provides a structured and configurable way to handle informational and error messages.
+
+*   **Configuration:** Logging is configured in the main entry point (`bin/github_reporter.dart`).
+*   **Verbosity Control:** The `--verbose` command-line flag controls the output level. When enabled, the log level is set to `Level.ALL`, providing detailed operational messages. Otherwise, it defaults to `Level.SEVERE`, only showing critical errors.
+*   **Output:** All log records are written to `stderr`.
+
+## 6. Data Models
 
 The application will leverage the existing data models provided by the `github` package. This includes classes such as `PullRequest`, `User`, `Issue`, and `Comment` to represent the data fetched from the GitHub API. This avoids redefining models and ensures consistency with the API client.
 
-## 6. Testing
+## 7. Testing
 
-### 6.1. Unit Testing
+### 7.1. Unit Testing
 
 Unit tests will be implemented for all core components to ensure their individual logic functions correctly. The `test` package will be used for writing these tests.
 
