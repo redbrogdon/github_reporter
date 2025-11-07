@@ -94,6 +94,13 @@ This document outlines the steps to implement the GitHub PR Reporter application
 - [x] 4. Update `USAGE.md` to document the new `--exclude-author` option.
 - [x] 5. Update `DESIGN.md` to reflect the new filtering functionality.
 
+## Phase 12: Report Formatting Enhancements
+
+- [x] 1. Make the pull request ID in the Markdown report a clickable link to the pull request on GitHub.
+- [x] 2. Format the `Merged At` time in the report to Pacific Time, 12-hour clock, with only hours and minutes listed.
+- [x] 3. Update `USAGE.md` to reflect these formatting changes.
+- [x] 4. Update `DESIGN.md` to reflect these formatting changes.
+
 ## Implementation Notes
 
 *   **2025-11-03:** Initialized a new Dart console application using `dart create`. Added `args`, `github`, and `google_generative_ai` as dependencies, and `test` and `mocktail` as dev dependencies. Created the initial directory and file structure for the services.
@@ -118,3 +125,5 @@ This document outlines the steps to implement the GitHub PR Reporter application
 *   **2025-11-04:** Refactored `maxRetries` in `GeminiService` to be a top-level constant for better maintainability.
 *   **2025-11-06:** Modified the default end date to be yesterday's date instead of the current date.
 *   **2025-11-06:** Implemented filtering of pull requests by author using the `--exclude-author` CLI option.
+*   **2025-11-06:** Implemented clickable pull request IDs and Pacific Time formatting for `Merged At` times in the report.
+*   **2025-11-06:** Made the author's name in the report a clickable link to their GitHub profile.

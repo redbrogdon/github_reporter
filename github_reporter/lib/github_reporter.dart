@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'src/services/gemini_service.dart';
 import 'src/services/github_service.dart';
 
@@ -38,6 +40,7 @@ class ReportGenerator {
     required DateTime endDate,
     List<String> excludeAuthors = const [],
   }) async {
+    await initializeDateFormatting('en_US', null);
     if (_verbose) {
       stderr.writeln(
         'Generating report for $owner/$repo from $startDate to $endDate...',
@@ -64,9 +67,11 @@ class ReportGenerator {
       if (_verbose) {
         stderr.writeln('Generating summary for PR #${pr.number}...');
       }
-      report.writeln('### PR #${pr.number}: ${pr.title}');
-      report.writeln('*   **Author:** ${pr.user?.login}');
-      report.writeln('*   **Merged At:** ${pr.mergedAt}');
+      report.writeln('### [PR #${pr.number}](${pr.htmlUrl}): ${pr.title}');
+      report.writeln(
+        '*   **Author:** [${pr.user?.login}](${pr.user?.htmlUrl})',
+      );
+      report.writeln('*   **Merged At:** ${_formatDateTime(pr.mergedAt)}');
       report.writeln('*   **Comments:** ${pr.commentsCount}');
       if (pr.body != null && pr.body!.isNotEmpty) {
         final diff = await _githubService.getPullRequestDiff(
@@ -84,5 +89,13 @@ class ReportGenerator {
     }
 
     return report.toString();
+  }
+
+  String _formatDateTime(DateTime? dateTime) {
+    if (dateTime == null) {
+      return 'N/A';
+    }
+    final pacificTime = dateTime.toUtc().subtract(const Duration(hours: 8));
+    return DateFormat.jm().format(pacificTime);
   }
 }

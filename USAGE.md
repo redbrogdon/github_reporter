@@ -35,7 +35,7 @@ dart run github_reporter.dart --repo <owner/repo> --github-token <YOUR_GITHUB_TO
 *   `--end-date`: The end date for the report in `YYYY-MM-DD` format.
 
     If `--start-date` is not provided, the tool will default to producing a report covering the previous weekday (or the previous Friday, Saturday, and Sunday if run on a Monday). If `--end-date` is not provided, the tool will default to yesterday's date.
-*   `--exclude-author`: Exclude pull requests authored by these GitHub handles. This option can be specified multiple times to exclude multiple authors.
+*   `--exclude-author`: Exclude pull requests authored by these GitHub handles. This option can be specified multiple times to exclude multiple authors. If not provided, the following authors will be excluded by default: `engine-flutter-autoroll`, `flutter-roller`, and `app/dependabot`.
 *   `--github-token`: Your GitHub Personal Access Token. (Required unless `GITHUB_TOKEN` environment variable is set)
 *   `--gemini-key`: Your Gemini API Key. (Required unless `GEMINI_API_KEY` environment variable is set)
 *   `--help`: Show a brief description of the app's functionality, a sample invocation, and then each of the flags/options and what they do.
@@ -74,9 +74,9 @@ The report starts with a header that includes the name of the repository and the
 
 Following the header is a list of pull requests in chronological order of when they were merged. Each pull request entry includes the following information:
 
-*   **Pull Request:** The pull request number (e.g., #123).
-*   **Author:** The GitHub username of the author.
-*   **Merged At:** The time and date when the pull request was merged.
+*   **Pull Request:** The pull request number (e.g., #123) as a clickable link to the pull request on GitHub.
+*   **Author:** The GitHub username of the author as a clickable link to their GitHub profile.
+*   **Merged At:** The time (Pacific Time, 12-hour clock, hours and minutes only) when the pull request was merged.
 *   **Comments:** The number of comments on the pull request.
 *   **Title:** The title of the pull request.
 *   **Fixes:** A list of issue IDs that the pull request fixes, with links to the issues on GitHub.

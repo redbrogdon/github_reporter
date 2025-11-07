@@ -89,6 +89,14 @@ void main(List<String> arguments) async {
     final outputFile = results['output-file'] as String?;
     final excludeAuthors = results['exclude-author'] as List<String>;
 
+    if (excludeAuthors.isEmpty) {
+      excludeAuthors.addAll([
+        'engine-flutter-autoroll',
+        'flutter-roller',
+        'app/dependabot',
+      ]);
+    }
+
     final generator = ReportGenerator.withTokens(
       githubToken: githubToken,
       geminiApiKey: geminiApiKey,

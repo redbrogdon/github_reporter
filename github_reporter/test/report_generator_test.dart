@@ -28,7 +28,10 @@ void main() {
       final pr = PullRequest()
         ..number = 1
         ..title = 'Test PR'
-        ..user = (User()..login = 'testuser')
+        ..htmlUrl = 'https://github.com/owner/repo/pull/1'
+        ..user = (User()
+          ..login = 'testuser'
+          ..htmlUrl = 'https://github.com/testuser')
         ..mergedAt = DateTime.parse('2025-01-01T12:00:00Z')
         ..commentsCount = 2
         ..body = 'This is a test PR body.';
@@ -39,6 +42,7 @@ void main() {
           repo: 'repo',
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
+          excludeAuthors: any(named: 'excludeAuthors'),
         ),
       ).thenAnswer((_) async => [pr]);
 
@@ -68,9 +72,15 @@ void main() {
         report,
         contains('## From 2025-01-01 00:00:00.000 to 2025-01-31 00:00:00.000'),
       );
-      expect(report, contains('### PR #1: Test PR'));
-      expect(report, contains('*   **Author:** testuser'));
-      expect(report, contains('*   **Merged At:** 2025-01-01 12:00:00.000Z'));
+      expect(
+        report,
+        contains('### [PR #1](https://github.com/owner/repo/pull/1): Test PR'),
+      );
+      expect(
+        report,
+        contains('*   **Author:** [testuser](https://github.com/testuser)'),
+      );
+      expect(report, contains('*   **Merged At:** 4:00\u202fAM'));
       expect(report, contains('*   **Comments:** 2'));
       expect(report, contains('*   **Summary:** Test summary'));
       verify(

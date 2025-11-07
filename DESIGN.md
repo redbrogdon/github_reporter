@@ -19,7 +19,7 @@ The application will be structured around the following core components:
 *   **ReportGenerator Class:** All core functionality for generating the report will be encapsulated within a class named `ReportGenerator`, located in `lib/github_reporter.dart`. Its constructor will accept the GitHub and Gemini API keys. This class will have a primary public method, such as `generateReport`, which will accept arguments like the repository name, start date, end date, and an optional list of authors to exclude. This method will be responsible for:
     1.  Orchestrating calls to the `GitHubService` to fetch the required pull request data.
     2.  Coordinating with the `GeminiService` to generate a summary for each pull request.
-    3.  Formatting the collected and processed data into a Markdown string according to the structure defined in `USAGE.md`.
+    3.  Formatting the collected and processed data into a Markdown string according to the structure defined in `USAGE.md`. This includes making the pull request ID a clickable link to the pull request on GitHub, making the author's name a clickable link to their GitHub profile, and formatting the `Merged At` time to Pacific Time, 12-hour clock, with only hours and minutes listed.
     4.  Returning the final Markdown report as a string.
 
 ### 2.3. Service Layer
