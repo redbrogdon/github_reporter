@@ -1,6 +1,18 @@
 import 'dart:io';
 import 'package:github/github.dart';
 
+/// An exception that is thrown when the GitHub API rate limit is exceeded.
+class RateLimitException implements Exception {
+  /// The message to display.
+  final String message;
+
+  /// Creates a new instance of [RateLimitException].
+  RateLimitException(this.message);
+
+  @override
+  String toString() => 'RateLimitException: $message';
+}
+
 /// A service that interacts with the GitHub API.
 class GitHubService {
   final GitHub _github;
@@ -25,35 +37,38 @@ class GitHubService {
     required DateTime endDate,
     List<String> excludeAuthors = const [],
   }) async {
-    var query =
-        'repo:$owner/$repo is:pr is:merged '
-        'merged:${_formatDate(startDate)}..${_formatDate(endDate)}';
+    try {
+      var query = 'repo:$owner/$repo is:pr is:merged '
+          'merged:${_formatDate(startDate)}..${_formatDate(endDate)}';
 
-    for (final author in excludeAuthors) {
-      query += ' -author:$author';
-    }
-    if (_verbose) {
-      stderr.writeln(
-        'Making GitHub API request: search issues with query "$query"',
-      );
-    }
-    final searchResult = await _github.search.issues(query).toList();
-
-    final pullRequests = <PullRequest>[];
-    for (final issue in searchResult) {
+      for (final author in excludeAuthors) {
+        query += ' -author:$author';
+      }
       if (_verbose) {
         stderr.writeln(
-          'Making GitHub API request: get pull request #${issue.number}',
+          'Making GitHub API request: search issues with query "$query"',
         );
       }
-      final pr = await _github.pullRequests.get(
-        RepositorySlug(owner, repo),
-        issue.number,
-      );
-      pullRequests.add(pr);
-    }
+      final searchResult = await _github.search.issues(query).toList();
 
-    return pullRequests;
+      final pullRequests = <PullRequest>[];
+      for (final issue in searchResult) {
+        if (_verbose) {
+          stderr.writeln(
+            'Making GitHub API request: get pull request #${issue.number}',
+          );
+        }
+        final pr = await _github.pullRequests.get(
+          RepositorySlug(owner, repo),
+          issue.number,
+        );
+        pullRequests.add(pr);
+      }
+
+      return pullRequests;
+    } on RateLimitHit {
+      throw RateLimitException('GitHub API rate limit exceeded.');
+    }
   }
 
   String _formatDate(DateTime date) {
@@ -66,16 +81,20 @@ class GitHubService {
     required String repo,
     required int number,
   }) async {
-    if (_verbose) {
-      stderr.writeln(
-        'Making GitHub API request: get diff for PR #$number in $owner/$repo',
+    try {
+      if (_verbose) {
+        stderr.writeln(
+          'Making GitHub API request: get diff for PR #$number in $owner/$repo',
+        );
+      }
+      final httpClient = _github.client;
+      final response = await httpClient.get(
+        Uri.parse('https://api.github.com/repos/$owner/$repo/pulls/$number'),
+        headers: {'Accept': 'application/vnd.github.v3.diff'},
       );
+      return response.body;
+    } on RateLimitHit {
+      throw RateLimitException('GitHub API rate limit exceeded.');
     }
-    final httpClient = _github.client;
-    final response = await httpClient.get(
-      Uri.parse('https://api.github.com/repos/$owner/$repo/pulls/$number'),
-      headers: {'Accept': 'application/vnd.github.v3.diff'},
-    );
-    return response.body;
   }
 }

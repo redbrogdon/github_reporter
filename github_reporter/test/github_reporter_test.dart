@@ -68,7 +68,7 @@ void main() {
       expect(report, contains('# GitHub PR Report for owner/repo'));
       expect(
         report,
-        contains('## From 2025-01-01 00:00:00.000 to 2025-01-31 00:00:00.000'),
+        contains('## From 2025-01-01 to 2025-01-31'),
       );
       expect(
         report,
@@ -78,7 +78,7 @@ void main() {
         report,
         contains('*   **Author:** [testuser](https://github.com/testuser)'),
       );
-      expect(report, contains('*   **Merged At:** 4:00\u202fAM'));
+      expect(report, contains('*   **Merged At:** 2025-01-01'));
       expect(report, contains('*   **Comments:** 2'));
       expect(report, contains('*   **Summary:** Test summary'));
     });

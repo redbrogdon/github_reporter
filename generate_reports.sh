@@ -1,6 +1,19 @@
 #!/bin/bash
-pwd
-REPOS=("flutter/flutter" "flutter/website" "dart-lang/site-www")
+
+set -e
+
+REPOS=(
+  "dart-lang/ai"
+  "dart-lang/language"
+  "dart-lang/native"
+  "dart-lang/sdk"
+  "flutter/ai"
+  "flutter/codelabs"
+  "flutter/flutter"
+  "flutter/packages"
+  "flutter/samples"
+  "flutter/website"
+)
 
 # 1. Fix: Get just the date string first
 DATE_STR=$(date +%Y-%m-%d)
@@ -21,7 +34,7 @@ do
   echo "***** Generating report for $REPO..."
   
   # Run the reporter
-  dart run github_reporter/bin/github_reporter.dart --repo="$REPO" --output-file="$FILENAME"
+  dart run github_reporter/bin/github_reporter.dart --verbose --repo="$REPO" --output-file="$FILENAME"
   
   # Append to the combined file
   cat "$FILENAME" >> "$COMBINED_FILENAME"

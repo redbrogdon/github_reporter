@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:github_reporter/src/services/github_service.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'src/services/gemini_service.dart';
@@ -60,7 +61,7 @@ class ReportGenerator {
 
     final report = StringBuffer();
     report.writeln('# GitHub PR Report for $owner/$repo');
-    report.writeln('## From $startDate to $endDate');
+    report.writeln('## ${_formatDateRange(startDate, endDate)}');
     report.writeln();
 
     for (final pr in pullRequests) {
@@ -91,11 +92,20 @@ class ReportGenerator {
     return report.toString();
   }
 
+  String _formatDateRange(DateTime startDate, DateTime endDate) {
+    final start = DateFormat('yyyy-MM-dd').format(startDate);
+    final end = DateFormat('yyyy-MM-dd').format(endDate);
+    if (start == end) {
+      return 'From $start';
+    } else {
+      return 'From $start to $end';
+    }
+  }
+
   String _formatDateTime(DateTime? dateTime) {
     if (dateTime == null) {
       return 'N/A';
     }
-    final pacificTime = dateTime.toUtc().subtract(const Duration(hours: 8));
-    return DateFormat.jm().format(pacificTime);
+    return DateFormat('yyyy-MM-dd').format(dateTime);
   }
 }

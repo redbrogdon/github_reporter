@@ -44,6 +44,10 @@ Dedicated service classes will encapsulate interactions with external APIs. Thei
 
 Upon encountering critical errors, such as invalid API keys, network failures, or other unrecoverable issues, the application will exit gracefully and print a descriptive error message to `stderr`.
 
+### 4.1. GitHub API Rate Limit Handling
+
+To handle GitHub API rate limit errors, a custom exception class, `RateLimitException`, will be defined. When the `GitHubService` encounters a `RateLimitHit` exception from the `github` package, it will catch it and re-throw it as a `RateLimitException`. The main entry point in `bin/github_reporter.dart` will have a `try-catch` block to handle this specific exception. If a `RateLimitException` is caught, a user-friendly error message will be logged to `stderr`, and the application will exit with a non-zero status code. This ensures that the application does not attempt to proceed with generating a report when the rate limit has been exceeded.
+
 ## 5. Data Models
 
 The application will leverage the existing data models provided by the `github` package. This includes classes such as `PullRequest`, `User`, `Issue`, and `Comment` to represent the data fetched from the GitHub API. This avoids redefining models and ensures consistency with the API client.

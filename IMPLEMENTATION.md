@@ -101,6 +101,16 @@ This document outlines the steps to implement the GitHub PR Reporter application
 - [x] 3. Update `USAGE.md` to reflect these formatting changes.
 - [x] 4. Update `DESIGN.md` to reflect these formatting changes.
 
+## Phase 13: GitHub API Rate Limit Handling
+
+- [ ] 1. Create a custom exception class `RateLimitException` in `github_service.dart`.
+- [ ] 2. In `GitHubService`, catch the `RateLimitHit` exception from the `github` package and re-throw it as a `RateLimitException`.
+- [ ] 3. In `bin/github_reporter.dart`, add a `try-catch` block to handle the `RateLimitException`.
+- [ ] 4. When a `RateLimitException` is caught, log a user-friendly error message to `stderr` and exit with a non-zero status code.
+- [ ] 5. Ensure that no report is written to a file if a `RateLimitException` occurs.
+- [ ] 6. Update `DESIGN.md` to document the new rate limit handling mechanism.
+- [ ] 7. Write a unit test to verify that `RateLimitHit` is correctly caught and re-thrown as `RateLimitException`.
+
 ## Implementation Notes
 
 *   **2025-11-03:** Initialized a new Dart console application using `dart create`. Added `args`, `github`, and `google_generative_ai` as dependencies, and `test` and `mocktail` as dev dependencies. Created the initial directory and file structure for the services.
@@ -122,8 +132,8 @@ This document outlines the steps to implement the GitHub PR Reporter application
 *   **2025-11-04:** Added an `--output-file` option to the CLI to allow writing the report to a file instead of printing it to the console.
 *   **2025-11-04:** Clarified in `USAGE.md` that the `--output-file` option will overwrite existing files.
 *   **2025-11-04:** Implemented a retry mechanism with exponential backoff in `GeminiService` to handle transient API errors.
-*   **2025-11-04:** Refactored `maxRetries` in `GeminiService` to be a top-level constant for better maintainability.
-*   **2025-11-06:** Modified the default end date to be yesterday's date instead of the current date.
-*   **2025-11-06:** Implemented filtering of pull requests by author using the `--exclude-author` CLI option.
-*   **2025-11-06:** Implemented clickable pull request IDs and Pacific Time formatting for `Merged At` times in the report.
-*   **2025-11-06:** Made the author's name in the report a clickable link to their GitHub profile.
+-   **2025-11-04:** Refactored `maxRetries` in `GeminiService` to be a top-level constant for better maintainability.
+-   **2025-11-06:** Modified the default end date to be yesterday's date instead of the current date.
+-   **2025-11-06:** Implemented filtering of pull requests by author using the `--exclude-author` CLI option.
+-   **2025-11-06:** Implemented clickable pull request IDs and Pacific Time formatting for `Merged At` times in the report.
+-   **2025-11-06:** Made the author's name in the report a clickable link to their GitHub profile.

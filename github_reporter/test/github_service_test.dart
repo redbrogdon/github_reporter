@@ -77,6 +77,29 @@ void main() {
 
       expect(result, 'Test diff');
     });
+
+    test('getMergedPullRequests throws RateLimitException on RateLimitHit',
+        () async {
+      final startDate = DateTime.parse('2025-01-01');
+      final endDate = DateTime.parse('2025-01-31');
+      final query =
+          'repo:owner/repo is:pr is:merged '
+          'merged:2025-01-01..2025-01-31';
+
+      when(
+        () => mockSearchService.issues(query),
+      ).thenThrow(RateLimitHit(mockGitHub));
+
+      expect(
+        () => gitHubService.getMergedPullRequests(
+          owner: 'owner',
+          repo: 'repo',
+          startDate: startDate,
+          endDate: endDate,
+        ),
+        throwsA(isA<RateLimitException>()),
+      );
+    });
   });
 }
 

@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:github_reporter/github_reporter.dart';
 
+import 'package:github_reporter/src/services/github_service.dart';
+
 void main(List<String> arguments) async {
   final parser = ArgParser()
     ..addOption('repo', help: 'The GitHub repository in the format owner/repo.')
@@ -119,6 +121,9 @@ void main(List<String> arguments) async {
     } else {
       print(report);
     }
+  } on RateLimitException catch (e) {
+    stderr.writeln(e.message);
+    exit(1);
   } catch (e) {
     stderr.writeln(e);
     exit(1);
