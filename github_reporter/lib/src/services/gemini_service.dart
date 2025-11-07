@@ -1,4 +1,11 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:google_generative_ai/google_generative_ai.dart';
+
+import 'prompts.dart';
+
+const _maxRetries = 3;
 
 /// A service that interacts with the Gemini API.
 class GeminiService {
@@ -11,19 +18,30 @@ class GeminiService {
   factory GeminiService.withApiKey(String apiKey) {
     return GeminiService(
       GenerativeModel(
-        model: 'gemini-pro',
+        model: 'gemini-2.5-pro',
         apiKey: apiKey,
-        systemInstruction: Content.system(
-          'You are an expert software engineer. Your task is to provide a concise, high-level summary of a pull request. Focus on the "what" and the "why" of the changes. The summary should be easy to understand for both technical and non-technical audiences. Do not simply list the changes, but explain their purpose and impact.',
-        ),
+        systemInstruction: Content.system(systemInstruction),
       ),
     );
   }
 
   /// Gets a summary of the given text.
   Future<String> getSummary(String text) async {
-    final content = [Content.text(text)];
-    final response = await _model.generateContent(content);
-    return response.text ?? '';
+    var retries = 0;
+    while (retries < _maxRetries) {
+      try {
+        final content = [Content.text(text)];
+        final response = await _model.generateContent(content);
+        return response.text ?? '';
+      } catch (e) {
+        retries++;
+        if (retries >= _maxRetries) {
+          rethrow;
+        }
+        final delay = Duration(seconds: pow(2, retries).toInt());
+        await Future.delayed(delay);
+      }
+    }
+    throw Exception('Failed to get summary after $_maxRetries retries.');
   }
 }

@@ -51,7 +51,9 @@ void main() {
       ).thenAnswer((_) => Future.value('Test diff'));
 
       when(
-        () => mockGeminiService.getSummary('This is a test PR body.\n\nTest diff'),
+        () => mockGeminiService.getSummary(
+          'This is a test PR body.\n\nTest diff',
+        ),
       ).thenAnswer((_) async => 'Test summary');
 
       final report = await reportGenerator.generateReport(

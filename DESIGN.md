@@ -11,8 +11,8 @@ The application will be structured around the following core components:
 ### 2.1. Command-Line Interface (CLI)
 
 *   **Entry Point:** The main entry point for the application will be `bin/github_reporter.dart`.
-*   **Argument Parsing:** The `args` package will be used to parse command-line flags and options, including `--repo`, `--start-date`, `--end-date`, `--github-token`, and `--gemini-key`.
-*   **CLI-related Tasks:** This file will handle all command-line related tasks, such as displaying help messages and validating basic argument presence. It will also be responsible for retrieving the GitHub and Gemini API keys from either the command-line arguments or environment variables.
+*   **Argument Parsing:** The `args` package will be used to parse command-line flags and options, including `--repo`, `--start-date`, `--end-date`, `--github-token`, `--gemini-key`, and a new `--output-file` option.
+*   **CLI-related Tasks:** This file will handle all command-line related tasks, such as displaying help messages and validating basic argument presence. It will also be responsible for retrieving the GitHub and Gemini API keys from either the command-line arguments or environment variables. It will determine whether to write the report to a file or print it to standard output based on the presence of the `--output-file` option.
 
 ### 2.2. Report Generation Logic
 
@@ -26,8 +26,8 @@ The application will be structured around the following core components:
 
 Dedicated service classes will encapsulate interactions with external APIs. Their constructors will accept the necessary API keys.
 
-*   **GitHubService:** This class will handle all communication with the GitHub API. It will utilize the `github` package from `pub.dev` to fetch pull request data, comments, and other relevant information.
-*   **GeminiService:** This class will manage interactions with the Gemini API. It will use the `google_cloud_ai_generativelanguage_v1beta` package to perform text summarization on pull request content.
+*   **GitHubService:** This class will handle all communication with the GitHub API. It will utilize the `github` package from `pub.dev`. Instead of fetching all closed pull requests and filtering them locally, it will use the `SearchService` to find merged pull requests within the specified date range directly. This is more efficient as it delegates the filtering to the GitHub API. For each issue returned by the search, it will then fetch the full `PullRequest` object to ensure all necessary data is available.
+*   **GeminiService:** This class will manage interactions with the Gemini API. It will use the `google_cloud_ai_generativelanguage_v1beta` package to perform text summarization on pull request content. The system instruction for the Gemini model is defined as a `const` string in a dedicated Dart file (`lib/src/services/prompts.dart`), allowing for compile-time validation and easier management of the prompt. To handle transient errors from the Gemini API, the service will implement a retry mechanism with exponential backoff. It will attempt to generate a summary up to three times before failing.
 
 ## 3. Data Flow
 
@@ -38,7 +38,7 @@ Dedicated service classes will encapsulate interactions with external APIs. Thei
 5.  `GitHubService` fetches pull request data.
 6.  For each pull request, `GeminiService` generates a summary of changes.
 7.  Finally, the `generateReport` method will format the collected data into a Markdown report and return it as a string.
-8.  The entry point script will print this string to standard output.
+8.  The entry point script will either write this string to the file specified by the `--output-file` option or print it to standard output if the option is not provided.
 
 ## 4. Error Handling
 

@@ -1,15 +1,20 @@
+import 'dart:io';
 import 'package:github/github.dart';
 
 /// A service that interacts with the GitHub API.
 class GitHubService {
   final GitHub _github;
+  final bool _verbose;
 
   /// Creates a new instance of [GitHubService].
-  GitHubService(this._github);
+  GitHubService(this._github, {bool verbose = false}) : _verbose = verbose;
 
   /// Creates a new instance of [GitHubService] using a GitHub token.
-  factory GitHubService.withToken(String token) {
-    return GitHubService(GitHub(auth: Authentication.withToken(token)));
+  factory GitHubService.withToken(String token, {bool verbose = false}) {
+    return GitHubService(
+      GitHub(auth: Authentication.withToken(token)),
+      verbose: verbose,
+    );
   }
 
   /// Gets a list of merged pull requests for a given repository and date range.
@@ -20,18 +25,32 @@ class GitHubService {
     required DateTime endDate,
   }) async {
     final slug = RepositorySlug(owner, repo);
-    final pullRequests = await _github.pullRequests
-        .list(slug, state: 'closed', sort: 'updated', direction: 'desc')
-        .toList();
+    final query =
+        'repo:$owner/$repo is:pr is:merged '
+        'merged:${_formatDate(startDate)}..${_formatDate(endDate)}';
+    if (_verbose) {
+      stderr.writeln(
+        'Making GitHub API request: search issues with query "$query"',
+      );
+    }
+    final searchResult = await _github.search.issues(query).toList();
 
-    return pullRequests
-        .where(
-          (pr) =>
-              pr.mergedAt != null &&
-              pr.mergedAt!.isAfter(startDate) &&
-              pr.mergedAt!.isBefore(endDate),
-        )
-        .toList();
+    final pullRequests = <PullRequest>[];
+    for (final issue in searchResult) {
+      if (_verbose) {
+        stderr.writeln(
+          'Making GitHub API request: get pull request #${issue.number}',
+        );
+      }
+      final pr = await _github.pullRequests.get(slug, issue.number);
+      pullRequests.add(pr);
+    }
+
+    return pullRequests;
+  }
+
+  String _formatDate(DateTime date) {
+    return date.toIso8601String().substring(0, 10);
   }
 
   /// Gets the diff for a given pull request.
@@ -40,13 +59,16 @@ class GitHubService {
     required String repo,
     required int number,
   }) async {
+    if (_verbose) {
+      stderr.writeln(
+        'Making GitHub API request: get diff for PR #$number in $owner/$repo',
+      );
+    }
     final slug = RepositorySlug(owner, repo);
     final httpClient = _github.client;
     final response = await httpClient.get(
       Uri.parse('https://api.github.com/repos/$owner/$repo/pulls/$number'),
-      headers: {
-        'Accept': 'application/vnd.github.v3.diff',
-      },
+      headers: {'Accept': 'application/vnd.github.v3.diff'},
     );
     return response.body;
   }
