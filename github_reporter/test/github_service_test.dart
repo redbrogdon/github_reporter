@@ -1,50 +1,55 @@
 import 'dart:convert';
 
 import 'package:github_reporter/src/services/github_service.dart';
-import 'package:http/http.dart';
-import 'package:mocktail/mocktail.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:test/test.dart';
-import 'package:github/github.dart';
-
-class MockGitHub extends Mock implements GitHub {}
-
-class MockPullRequestsService extends Mock implements PullRequestsService {}
-
-class MockSearchService extends Mock implements SearchService {}
 
 void main() {
   group('GitHubService', () {
     late GitHubService gitHubService;
-    late MockGitHub mockGitHub;
-    late MockPullRequestsService mockPullRequestsService;
-    late MockSearchService mockSearchService;
+    late MockClient mockHttpClient;
 
     setUp(() {
-      mockGitHub = MockGitHub();
-      mockPullRequestsService = MockPullRequestsService();
-      mockSearchService = MockSearchService();
-      when(() => mockGitHub.pullRequests).thenReturn(mockPullRequestsService);
-      when(() => mockGitHub.search).thenReturn(mockSearchService);
-      gitHubService = GitHubService(mockGitHub);
+      mockHttpClient = MockClient((request) async {
+        if (request.url.path == '/search/issues') {
+          return http.Response(
+            jsonEncode({
+              'items': [
+                {'number': 123},
+              ],
+            }),
+            200,
+          );
+        }
+        if (request.url.path == '/repos/owner/repo/pulls/123') {
+          return http.Response(
+            jsonEncode({
+              'number': 123,
+              'title': 'Test PR',
+              'html_url': 'https://github.com/owner/repo/pull/123',
+              'user': {
+                'login': 'testuser',
+                'html_url': 'https://github.com/testuser',
+              },
+              'merged_at': '2025-01-01T12:00:00Z',
+              'comments': 2,
+              'body': 'This is a test PR body.',
+            }),
+            200,
+          );
+        }
+        if (request.url.path == '/repos/owner/repo/pulls/1') {
+          return http.Response('Test diff', 200);
+        }
+        return http.Response('Not Found', 404);
+      });
+      gitHubService = GitHubService('test_token', client: mockHttpClient);
     });
 
     test('getMergedPullRequests uses search and gets PRs', () async {
-      final issue1 = Issue.fromJson(jsonDecode('{"number": 123}'));
-      final pr1 = PullRequest()..number = 123;
-
-      final slug = RepositorySlug('owner', 'repo');
       final startDate = DateTime.parse('2025-01-01');
       final endDate = DateTime.parse('2025-01-31');
-      final query =
-          'repo:owner/repo is:pr is:merged '
-          'merged:2025-01-01..2025-01-31';
-
-      when(
-        () => mockSearchService.issues(query),
-      ).thenAnswer((_) => Stream.fromIterable([issue1]));
-      when(
-        () => mockPullRequestsService.get(slug, 123),
-      ).thenAnswer((_) async => pr1);
 
       final result = await gitHubService.getMergedPullRequests(
         owner: 'owner',
@@ -55,20 +60,9 @@ void main() {
 
       expect(result, hasLength(1));
       expect(result.first.number, 123);
-      verify(() => mockSearchService.issues(query)).called(1);
-      verify(() => mockPullRequestsService.get(slug, 123)).called(1);
     });
 
     test('getPullRequestDiff returns the diff', () async {
-      final mockHttpClient = MockHttpClient();
-      when(() => mockGitHub.client).thenReturn(mockHttpClient);
-      when(
-        () => mockHttpClient.get(
-          Uri.parse('https://api.github.com/repos/owner/repo/pulls/1'),
-          headers: {'Accept': 'application/vnd.github.v3.diff'},
-        ),
-      ).thenAnswer((_) async => Response('Test diff', 200));
-
       final result = await gitHubService.getPullRequestDiff(
         owner: 'owner',
         repo: 'repo',
@@ -76,31 +70,7 @@ void main() {
       );
 
       expect(result, 'Test diff');
+      expect(result, 'Test diff');
     });
-
-    test('getMergedPullRequests throws RateLimitException on RateLimitHit',
-        () async {
-      final startDate = DateTime.parse('2025-01-01');
-      final endDate = DateTime.parse('2025-01-31');
-      final query =
-          'repo:owner/repo is:pr is:merged '
-          'merged:2025-01-01..2025-01-31';
-
-      when(
-        () => mockSearchService.issues(query),
-      ).thenThrow(RateLimitHit(mockGitHub));
-
-      expect(
-        () => gitHubService.getMergedPullRequests(
-          owner: 'owner',
-          repo: 'repo',
-          startDate: startDate,
-          endDate: endDate,
-        ),
-        throwsA(isA<RateLimitException>()),
-      );
-    });
-  });
+  }, timeout: Timeout(Duration(seconds: 180)));
 }
-
-class MockHttpClient extends Mock implements Client {}

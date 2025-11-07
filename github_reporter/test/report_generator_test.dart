@@ -1,9 +1,9 @@
 import 'package:github_reporter/github_reporter.dart';
+import 'package:github_reporter/src/models/pull_request.dart';
 import 'package:github_reporter/src/services/gemini_service.dart';
 import 'package:github_reporter/src/services/github_service.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
-import 'package:github/github.dart';
 
 class MockGitHubService extends Mock implements GitHubService {}
 
@@ -25,16 +25,15 @@ void main() {
     });
 
     test('generateReport returns a correctly formatted report', () async {
-      final pr = PullRequest()
-        ..number = 1
-        ..title = 'Test PR'
-        ..htmlUrl = 'https://github.com/owner/repo/pull/1'
-        ..user = (User()
-          ..login = 'testuser'
-          ..htmlUrl = 'https://github.com/testuser')
-        ..mergedAt = DateTime.parse('2025-01-01T12:00:00Z')
-        ..commentsCount = 2
-        ..body = 'This is a test PR body.';
+      final pr = PullRequest(
+        number: 1,
+        title: 'Test PR',
+        htmlUrl: 'https://github.com/owner/repo/pull/1',
+        user: User(login: 'testuser', htmlUrl: 'https://github.com/testuser'),
+        mergedAt: DateTime.parse('2025-01-01T12:00:00Z'),
+        comments: 2,
+        body: 'This is a test PR body.',
+      );
 
       when(
         () => mockGitHubService.getMergedPullRequests(
@@ -68,20 +67,17 @@ void main() {
       );
 
       expect(report, contains('# GitHub PR Report for owner/repo'));
-      expect(
-        report,
-        contains('## From 2025-01-01 to 2025-01-31'),
-      );
+      expect(report, contains('## From 2025-01-01 to 2025-01-31'));
       expect(
         report,
         contains('### [PR #1](https://github.com/owner/repo/pull/1): Test PR'),
       );
       expect(
         report,
-        contains('*   **Author:** [testuser](https://github.com/testuser)'),
+        contains('* **Author:** [testuser](https://github.com/testuser)'),
       );
-      expect(report, contains('*   **Merged At:** 2025-01-01'));
-      expect(report, contains('*   **Comments:** 2'));
+      expect(report, contains('* **Merged At:** 2025-01-01'));
+      expect(report, contains('* **Comments:** 2'));
       expect(report, contains('*   **Summary:** Test summary'));
       verify(
         () => mockGitHubService.getPullRequestDiff(

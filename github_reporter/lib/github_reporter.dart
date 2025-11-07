@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
@@ -60,28 +58,45 @@ class ReportGenerator {
     report.writeln('## ${_formatDateRange(startDate, endDate)}');
     report.writeln();
 
-    for (final pr in pullRequests) {
-      _log.info('Generating summary for PR #${pr.number}...');
+    if (pullRequests.isEmpty) {
+      report.writeln('No pull requests were merged during this time.');
+    } else {
+      for (final pr in pullRequests) {
+        _log.info('Generating summary for PR #${pr.number}...');
 
-      report.writeln('### [PR #${pr.number}](${pr.htmlUrl}): ${pr.title}');
-      report.writeln('* **Author:** [${pr.user?.login}](${pr.user?.htmlUrl})');
-      report.writeln('* **Merged At:** ${_formatDateTime(pr.mergedAt)}');
-      report.writeln('* **Comments:** ${pr.commentsCount}');
+        report.writeln(
+            '### ${_getCommentEmojis(pr.comments)}[PR #${pr.number}](${pr.htmlUrl}): ${pr.title}');
+        report.writeln('* **Author:** [${pr.user.login}](${pr.user.htmlUrl})');
+        report.writeln('* **Merged At:** ${_formatDateTime(pr.mergedAt)}');
+        report.writeln('* **Comments:** ${pr.comments}');
 
-      if (pr.body != null && pr.body!.isNotEmpty) {
-        final diff = await _githubService.getPullRequestDiff(
-          owner: owner,
-          repo: repo,
-          number: pr.number!,
-        );
-        final summary = await _geminiService.getSummary('${pr.body}\n\n$diff');
-        report.writeln('*   **Summary:** $summary');
+        if (pr.body != null && pr.body!.isNotEmpty) {
+          final diff = await _githubService.getPullRequestDiff(
+            owner: owner,
+            repo: repo,
+            number: pr.number,
+          );
+          final summary = await _geminiService.getSummary(
+            '${pr.body}\n\n$diff',
+          );
+          report.writeln('*   **Summary:** $summary');
+        }
+        report.writeln();
+        _log.info('Finished generating summary for PR #${pr.number}.');
       }
-      report.writeln();
-      _log.info('Finished generating summary for PR #${pr.number}.');
     }
 
     return report.toString();
+  }
+
+  String _getCommentEmojis(int comments) {
+    if (comments > 10) {
+      return '🔥🔥🔥 ';
+    } else if (comments > 5) {
+      return '🔥 ';
+    } else {
+      return '';
+    }
   }
 
   String _formatDateRange(DateTime startDate, DateTime endDate) {
