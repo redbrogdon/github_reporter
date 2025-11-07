@@ -21,6 +21,10 @@ void main(List<String> arguments) async {
     ..addOption(
       'output-file',
       help: 'The path to the file where the report will be written.',
+    )
+    ..addMultiOption(
+      'exclude-author',
+      help: 'Exclude pull requests authored by these GitHub handles.',
     );
 
   try {
@@ -34,7 +38,8 @@ void main(List<String> arguments) async {
       print(
         '\nUsage: dart run github_reporter.dart --repo <owner/repo> '
         '--github-token <YOUR_GITHUB_TOKEN> --gemini-key <YOUR_GEMINI_API_KEY> '
-        '[--start-date <YYYY-MM-DD>] [--end-date <YYYY-MM-DD>]\n',
+        '[--start-date <YYYY-MM-DD>] [--end-date <YYYY-MM-DD>] '
+        '[--exclude-author <GITHUB_HANDLE>]\n',
       );
       print(parser.usage);
       return;
@@ -82,6 +87,7 @@ void main(List<String> arguments) async {
 
     final verbose = results['verbose'] as bool;
     final outputFile = results['output-file'] as String?;
+    final excludeAuthors = results['exclude-author'] as List<String>;
 
     final generator = ReportGenerator.withTokens(
       githubToken: githubToken,
@@ -94,6 +100,7 @@ void main(List<String> arguments) async {
       repo: repoName,
       startDate: startDate,
       endDate: endDate,
+      excludeAuthors: excludeAuthors,
     );
 
     if (outputFile != null) {

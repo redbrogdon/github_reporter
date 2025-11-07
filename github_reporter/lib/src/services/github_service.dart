@@ -23,11 +23,15 @@ class GitHubService {
     required String repo,
     required DateTime startDate,
     required DateTime endDate,
+    List<String> excludeAuthors = const [],
   }) async {
-    final slug = RepositorySlug(owner, repo);
-    final query =
+    var query =
         'repo:$owner/$repo is:pr is:merged '
         'merged:${_formatDate(startDate)}..${_formatDate(endDate)}';
+
+    for (final author in excludeAuthors) {
+      query += ' -author:$author';
+    }
     if (_verbose) {
       stderr.writeln(
         'Making GitHub API request: search issues with query "$query"',
@@ -42,7 +46,10 @@ class GitHubService {
           'Making GitHub API request: get pull request #${issue.number}',
         );
       }
-      final pr = await _github.pullRequests.get(slug, issue.number);
+      final pr = await _github.pullRequests.get(
+        RepositorySlug(owner, repo),
+        issue.number,
+      );
       pullRequests.add(pr);
     }
 
@@ -64,7 +71,6 @@ class GitHubService {
         'Making GitHub API request: get diff for PR #$number in $owner/$repo',
       );
     }
-    final slug = RepositorySlug(owner, repo);
     final httpClient = _github.client;
     final response = await httpClient.get(
       Uri.parse('https://api.github.com/repos/$owner/$repo/pulls/$number'),

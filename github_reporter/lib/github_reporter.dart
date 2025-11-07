@@ -36,6 +36,7 @@ class ReportGenerator {
     required String repo,
     required DateTime startDate,
     required DateTime endDate,
+    List<String> excludeAuthors = const [],
   }) async {
     if (_verbose) {
       stderr.writeln(
@@ -48,6 +49,7 @@ class ReportGenerator {
       repo: repo,
       startDate: startDate,
       endDate: endDate,
+      excludeAuthors: excludeAuthors,
     );
     if (_verbose) {
       stderr.writeln('Found ${pullRequests.length} merged pull requests.');

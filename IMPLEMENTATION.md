@@ -86,6 +86,14 @@ This document outlines the steps to implement the GitHub PR Reporter application
 - [x] 4. If all retries fail, throw an exception.
 - [x] 5. Update `DESIGN.md` to reflect the new retry logic.
 
+## Phase 11: Filter by Author
+
+- [x] 1. Add a `--exclude-author` option to the CLI in `bin/github_reporter.dart`.
+- [x] 2. Modify `ReportGenerator.generateReport` to accept a list of authors to exclude.
+- [x] 3. Modify `GitHubService.getMergedPullRequests` to filter out pull requests from the specified authors using the GitHub search query.
+- [x] 4. Update `USAGE.md` to document the new `--exclude-author` option.
+- [x] 5. Update `DESIGN.md` to reflect the new filtering functionality.
+
 ## Implementation Notes
 
 *   **2025-11-03:** Initialized a new Dart console application using `dart create`. Added `args`, `github`, and `google_generative_ai` as dependencies, and `test` and `mocktail` as dev dependencies. Created the initial directory and file structure for the services.
@@ -109,3 +117,4 @@ This document outlines the steps to implement the GitHub PR Reporter application
 *   **2025-11-04:** Implemented a retry mechanism with exponential backoff in `GeminiService` to handle transient API errors.
 *   **2025-11-04:** Refactored `maxRetries` in `GeminiService` to be a top-level constant for better maintainability.
 *   **2025-11-06:** Modified the default end date to be yesterday's date instead of the current date.
+*   **2025-11-06:** Implemented filtering of pull requests by author using the `--exclude-author` CLI option.
