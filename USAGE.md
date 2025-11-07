@@ -22,20 +22,24 @@ A command-line application to generate reports on pull requests for a GitHub rep
 
 ## Usage
 
+A command-line tool to generate a summary report of GitHub repository activity using GitHub and Gemini APIs.
+
 ```bash
-dart run github_reporter.dart [options]
+dart run github_reporter.dart --repo <owner/repo> --github-token <YOUR_GITHUB_TOKEN> --gemini-key <YOUR_GEMINI_API_KEY> [--start-date <YYYY-MM-DD>] [--end-date <YYYY-MM-DD>]
 ```
 
 ### Options
 
 *   `--repo`: The GitHub repository in the format `owner/repo` (e.g., `flutter/flutter`). (Required)
-*   `--start-date`: The start date for the report in `YYYY-MM-DD` format. (Required)
-*   `--end-date`: The end date for the report in `YYYY-MM-DD` format. (Required)
+*   `--start-date`: The start date for the report in `YYYY-MM-DD` format.
+*   `--end-date`: The end date for the report in `YYYY-MM-DD` format.
 
-    If `--start-date` and `--end-date` are not provided, the tool will default to producing a report covering the previous weekday (or the previous Friday, Saturday, and Sunday if run on a Monday).
+    If `--start-date` is not provided, the tool will default to producing a report covering the previous weekday (or the previous Friday, Saturday, and Sunday if run on a Monday). If `--end-date` is not provided, the tool will default to yesterday's date.
 *   `--github-token`: Your GitHub Personal Access Token. (Required unless `GITHUB_TOKEN` environment variable is set)
 *   `--gemini-key`: Your Gemini API Key. (Required unless `GEMINI_API_KEY` environment variable is set)
-*   `--help`: Show the help message.
+*   `--help`: Show a brief description of the app's functionality, a sample invocation, and then each of the flags/options and what they do.
+*   `--verbose`: Enable verbose logging.
+*   `--output-file`: The path to the file where the report will be written. If not provided, the report will be printed to the console. If the file already exists, it will be overwritten.
 
 ### Environment Variables
 

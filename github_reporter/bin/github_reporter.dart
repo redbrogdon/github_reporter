@@ -16,12 +16,26 @@ void main(List<String> arguments) async {
     )
     ..addOption('github-token', help: 'Your GitHub Personal Access Token.')
     ..addOption('gemini-key', help: 'Your Gemini API Key.')
-    ..addFlag('help', negatable: false, help: 'Show this help message.');
+    ..addFlag('help', negatable: false, help: 'Show this help message.')
+    ..addFlag('verbose', negatable: false, help: 'Enable verbose logging.')
+    ..addOption(
+      'output-file',
+      help: 'The path to the file where the report will be written.',
+    );
 
   try {
     final results = parser.parse(arguments);
 
     if (results['help']) {
+      print(
+        'A command-line tool to generate a summary report of GitHub '
+        'repository activity using GitHub and Gemini APIs.',
+      );
+      print(
+        '\nUsage: dart run github_reporter.dart --repo <owner/repo> '
+        '--github-token <YOUR_GITHUB_TOKEN> --gemini-key <YOUR_GEMINI_API_KEY> '
+        '[--start-date <YYYY-MM-DD>] [--end-date <YYYY-MM-DD>]\n',
+      );
       print(parser.usage);
       return;
     }
@@ -44,7 +58,8 @@ void main(List<String> arguments) async {
         Platform.environment['GITHUB_TOKEN'];
     if (githubToken == null) {
       throw ArgumentError(
-        'Either the --github-token option or the GITHUB_TOKEN environment variable is required.',
+        'Either the --github-token option or the GITHUB_TOKEN environment '
+        'variable is required.',
       );
     }
 
@@ -53,7 +68,8 @@ void main(List<String> arguments) async {
         Platform.environment['GEMINI_API_KEY'];
     if (geminiApiKey == null) {
       throw ArgumentError(
-        'Either the --gemini-key option or the GEMINI_API_KEY environment variable is required.',
+        'Either the --gemini-key option or the GEMINI_API_KEY environment '
+        'variable is required.',
       );
     }
 
@@ -64,9 +80,13 @@ void main(List<String> arguments) async {
         ? DateTime.parse(results['end-date'])
         : _getDefaultEndDate();
 
+    final verbose = results['verbose'] as bool;
+    final outputFile = results['output-file'] as String?;
+
     final generator = ReportGenerator.withTokens(
       githubToken: githubToken,
       geminiApiKey: geminiApiKey,
+      verbose: verbose,
     );
 
     final report = await generator.generateReport(
@@ -76,7 +96,14 @@ void main(List<String> arguments) async {
       endDate: endDate,
     );
 
-    print(report);
+    if (outputFile != null) {
+      await File(outputFile).writeAsString(report);
+      if (verbose) {
+        stderr.writeln('Report written to $outputFile');
+      }
+    } else {
+      print(report);
+    }
   } catch (e) {
     stderr.writeln(e);
     exit(1);
@@ -92,5 +119,5 @@ DateTime _getDefaultStartDate() {
 }
 
 DateTime _getDefaultEndDate() {
-  return DateTime.now();
+  return DateTime.now().subtract(const Duration(days: 1));
 }
