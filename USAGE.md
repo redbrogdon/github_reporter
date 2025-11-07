@@ -25,7 +25,7 @@ A command-line application to generate reports on pull requests for a GitHub rep
 A command-line tool to generate a summary report of GitHub repository activity using GitHub and Gemini APIs.
 
 ```bash
-dart run github_reporter.dart --repo <owner/repo> --github-token <YOUR_GITHUB_TOKEN> --gemini-key <YOUR_GEMINI_API_KEY> [--start-date <YYYY-MM-DD>] [--end-date <YYYY-MM-DD>] [--exclude-author <GITHUB_HANDLE>]
+dart run github_reporter.dart --repo <owner/repo> --github-token <YOUR_GITHUB_PAT> --gemini-key <YOUR_GEMINI_API_KEY> [--start-date <YYYY-MM-DD>] [--end-date <YYYY-MM-DD>] [--exclude-author <GITHUB_HANDLE>]
 ```
 
 ### Options
@@ -36,7 +36,7 @@ dart run github_reporter.dart --repo <owner/repo> --github-token <YOUR_GITHUB_TO
 
     If `--start-date` is not provided, the tool will default to producing a report covering the previous weekday (or the previous Friday, Saturday, and Sunday if run on a Monday). If `--end-date` is not provided, the tool will default to yesterday's date.
 *   `--exclude-author`: Exclude pull requests authored by these GitHub handles. This option can be specified multiple times to exclude multiple authors. If not provided, the following authors will be excluded by default: `engine-flutter-autoroll`, `flutter-roller`, and `app/dependabot`.
-*   `--github-token`: Your GitHub Personal Access Token. (Required unless `GITHUB_TOKEN` environment variable is set)
+*   `--github-token`: Your GitHub Personal Access Token. (Required unless `GITHUB_PAT` environment variable is set)
 *   `--gemini-key`: Your Gemini API Key. (Required unless `GEMINI_API_KEY` environment variable is set)
 *   `--help`: Show a brief description of the app's functionality, a sample invocation, and then each of the flags/options and what they do.
 *   `--verbose`: Enable verbose logging.
@@ -46,7 +46,7 @@ dart run github_reporter.dart --repo <owner/repo> --github-token <YOUR_GITHUB_TO
 
 You can also provide the API keys as environment variables:
 
-*   `GITHUB_TOKEN`
+*   `GITHUB_PAT`
 *   `GEMINI_API_KEY`
 
 ## Example

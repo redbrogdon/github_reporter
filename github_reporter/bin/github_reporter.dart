@@ -39,7 +39,7 @@ void main(List<String> arguments) async {
       );
       print(
         '\nUsage: dart run github_reporter.dart --repo <owner/repo> '
-        '--github-token <YOUR_GITHUB_TOKEN> --gemini-key <YOUR_GEMINI_API_KEY> '
+        '--github-token <YOUR_GITHUB_PAT> --gemini-key <YOUR_GEMINI_API_KEY> '
         '[--start-date <YYYY-MM-DD>] [--end-date <YYYY-MM-DD>] '
         '[--exclude-author <GITHUB_HANDLE>]\n',
       );
@@ -62,10 +62,10 @@ void main(List<String> arguments) async {
 
     final githubToken =
         results['github-token'] as String? ??
-        Platform.environment['GITHUB_TOKEN'];
+        Platform.environment['GITHUB_PAT'];
     if (githubToken == null) {
       throw ArgumentError(
-        'Either the --github-token option or the GITHUB_TOKEN environment '
+        'Either the --github-token option or the GITHUB_PAT environment '
         'variable is required.',
       );
     }
