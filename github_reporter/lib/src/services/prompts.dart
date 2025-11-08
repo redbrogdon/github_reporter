@@ -61,8 +61,10 @@ the overall changes made to the repo by those pull requests and issue closures.
 In particular, you should focus on pull requests that had a lot of comments
 and issues that had a lot of reactions. Pull requests and issues that relate to
 the public API surface of Flutter and language features of the Dart programming
-language such as changes to syntax are also highliy important and should be
-referenced in the summary.
+language such as changes to syntax are also highly important and should be
+referenced in the summary. When you reference something from a particular pull
+request or issue, include the pull request or issue number as a clickable
+markdown link.
 
 Here is a list of the pull requests that landed in the repository:
 
