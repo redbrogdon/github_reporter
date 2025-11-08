@@ -108,11 +108,12 @@ class ReportGenerator {
       issueBuffer.writeln('No issues were closed during this time.\n');
     } else {
       for (final issue in closedIssues) {
-        issueBuffer.writeln('''
+        issueBuffer.write('''
 ### [Issue #${issue.number}](${issue.htmlUrl}): ${issue.title}
 * **Author:** [${issue.user.login}](${issue.user.htmlUrl})
 * **Closed At:** ${_formatDateTime(issue.closedAt)}
 ''');
+
         if (issue.reactions.totalCount > 0) {
           issueBuffer.writeln(
             '* **Reactions:** '
@@ -120,6 +121,8 @@ class ReportGenerator {
             '${_getReactionEmojis(issue.reactions)}',
           );
         }
+
+        issueBuffer.writeln();
       }
     }
 
