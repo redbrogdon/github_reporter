@@ -13,6 +13,36 @@ void main() {
     setUp(() {
       mockHttpClient = MockClient((request) async {
         if (request.url.path == '/search/issues') {
+          if (request.url.query.contains('is:issue')) {
+            return http.Response(
+              jsonEncode({
+                'items': [
+                  {
+                    'number': 123,
+                    'title': 'Test Issue',
+                    'html_url': 'https://github.com/owner/repo/issues/123',
+                    'user': {
+                      'login': 'testuser',
+                      'html_url': 'https://github.com/testuser',
+                    },
+                    'closed_at': '2025-01-01T12:00:00Z',
+                    'reactions': {
+                      'total_count': 1,
+                      '+1': 1,
+                      '-1': 0,
+                      'laugh': 0,
+                      'hooray': 0,
+                      'confused': 0,
+                      'heart': 0,
+                      'rocket': 0,
+                      'eyes': 0,
+                    },
+                  },
+                ],
+              }),
+              200,
+            );
+          }
           return http.Response(
             jsonEncode({
               'items': [
@@ -71,6 +101,23 @@ void main() {
 
       expect(result, 'Test diff');
       expect(result, 'Test diff');
+    });
+
+    test('getClosedIssues returns closed issues', () async {
+      final startDate = DateTime.parse('2025-01-01');
+      final endDate = DateTime.parse('2025-01-31');
+
+      final result = await gitHubService.getClosedIssues(
+        owner: 'owner',
+        repo: 'repo',
+        startDate: startDate,
+        endDate: endDate,
+      );
+
+      expect(result, hasLength(1));
+      expect(result.first.number, 123);
+      expect(result.first.reactions.totalCount, 1);
+      expect(result.first.reactions.plusOne, 1);
     });
   }, timeout: Timeout(Duration(seconds: 180)));
 }

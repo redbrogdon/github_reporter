@@ -2,6 +2,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 
+import 'src/models/issue.dart';
 import 'src/services/gemini_service.dart';
 import 'src/services/github_service.dart';
 
@@ -53,6 +54,15 @@ class ReportGenerator {
 
     _log.info('Found ${pullRequests.length} merged pull requests.');
 
+    final closedIssues = await _githubService.getClosedIssues(
+      owner: owner,
+      repo: repo,
+      startDate: startDate,
+      endDate: endDate,
+    );
+
+    _log.info('Found ${closedIssues.length} closed issues.');
+
     final report = StringBuffer();
     report.writeln('# GitHub PR Report for $owner/$repo');
     report.writeln('## ${_formatDateRange(startDate, endDate)}');
@@ -61,11 +71,14 @@ class ReportGenerator {
     if (pullRequests.isEmpty) {
       report.writeln('No pull requests were merged during this time.');
     } else {
+      report.writeln('## Merged Pull Requests');
+      report.writeln();
       for (final pr in pullRequests) {
         _log.info('Generating summary for PR #${pr.number}...');
 
         report.writeln(
-            '### ${_getCommentEmojis(pr.comments)}[PR #${pr.number}](${pr.htmlUrl}): ${pr.title}');
+          '### ${_getCommentEmojis(pr.comments)}[PR #${pr.number}](${pr.htmlUrl}): ${pr.title}',
+        );
         report.writeln('* **Author:** [${pr.user.login}](${pr.user.htmlUrl})');
         report.writeln('* **Merged At:** ${_formatDateTime(pr.mergedAt)}');
         report.writeln('* **Comments:** ${pr.comments}');
@@ -86,7 +99,57 @@ class ReportGenerator {
       }
     }
 
+    if (closedIssues.isNotEmpty) {
+      report.writeln('## Closed Issues');
+      report.writeln();
+      for (final issue in closedIssues) {
+        report.writeln(
+          '### [Issue #${issue.number}](${issue.htmlUrl}): ${issue.title}',
+        );
+        report.writeln(
+          '* **Author:** [${issue.user.login}](${issue.user.htmlUrl})',
+        );
+        report.writeln('* **Closed At:** ${_formatDateTime(issue.closedAt)}');
+        if (issue.reactions.totalCount > 0) {
+          report.writeln(
+            '* **Reactions:** **${issue.reactions.totalCount}** -- '
+            '${_getReactionEmojis(issue.reactions)}',
+          );
+        }
+        report.writeln();
+      }
+    }
+
     return report.toString();
+  }
+
+  String _getReactionEmojis(Reactions reactions) {
+    final emojis = <String>[];
+    if (reactions.plusOne > 0) {
+      emojis.add('👍 ${reactions.plusOne}');
+    }
+    if (reactions.minusOne > 0) {
+      emojis.add('👎 ${reactions.minusOne}');
+    }
+    if (reactions.laugh > 0) {
+      emojis.add('😄 ${reactions.laugh}');
+    }
+    if (reactions.hooray > 0) {
+      emojis.add('🎉 ${reactions.hooray}');
+    }
+    if (reactions.confused > 0) {
+      emojis.add('😕 ${reactions.confused}');
+    }
+    if (reactions.heart > 0) {
+      emojis.add('❤️ ${reactions.heart}');
+    }
+    if (reactions.rocket > 0) {
+      emojis.add('🚀 ${reactions.rocket}');
+    }
+    if (reactions.eyes > 0) {
+      emojis.add('👀 ${reactions.eyes}');
+    }
+    return emojis.join(' ');
   }
 
   String _getCommentEmojis(int comments) {

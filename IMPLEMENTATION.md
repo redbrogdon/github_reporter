@@ -111,6 +111,20 @@ This document outlines the steps to implement the GitHub PR Reporter application
 - [ ] 6. Update `DESIGN.md` to document the new rate limit handling mechanism.
 - [ ] 7. Write a unit test to verify that `RateLimitHit` is correctly caught and re-thrown as `RateLimitException`.
 
+## Phase 14: Closed Issue Reporting
+
+- [x] 1. Create a new `Issue` model in `lib/src/models/issue.dart`.
+- [x] 2. Add a `getClosedIssues` method to `GitHubService` to fetch closed issues within the specified date range.
+- [x] 3. In `ReportGenerator`, call `getClosedIssues` and add a new "Closed Issues" section to the report.
+- [x] 4. Write unit tests for the new `getClosedIssues` method in `GitHubService`.
+
+## Phase 15: Issue Reaction Reporting
+
+- [ ] 1. Update the `Issue` model in `lib/src/models/issue.dart` to include reaction data.
+- [ ] 2. Update the `getClosedIssues` method in `GitHubService` to fetch reaction data for each issue.
+- [ ] 3. In `ReportGenerator`, format and display the reaction data in the "Closed Issues" section of the report.
+- [ ] 4. Update the unit tests for `getClosedIssues` to include reaction data.
+
 ## Implementation Notes
 
 *   **2025-11-03:** Initialized a new Dart console application using `dart create`. Added `args`, `github`, and `google_generative_ai` as dependencies, and `test` and `mocktail` as dev dependencies. Created the initial directory and file structure for the services.

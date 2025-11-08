@@ -1,5 +1,6 @@
 import 'package:github_reporter/github_reporter.dart';
 import 'package:github_reporter/src/models/pull_request.dart';
+import 'package:github_reporter/src/models/user.dart';
 import 'package:github_reporter/src/services/gemini_service.dart';
 import 'package:github_reporter/src/services/github_service.dart';
 import 'package:mocktail/mocktail.dart';
@@ -46,6 +47,15 @@ void main() {
       ).thenAnswer((_) async => [pr]);
 
       when(
+        () => mockGitHubService.getClosedIssues(
+          owner: 'owner',
+          repo: 'repo',
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      when(
         () => mockGitHubService.getPullRequestDiff(
           owner: 'owner',
           repo: 'repo',
@@ -90,6 +100,15 @@ void main() {
             startDate: any(named: 'startDate'),
             endDate: any(named: 'endDate'),
             excludeAuthors: any(named: 'excludeAuthors'),
+          ),
+        ).thenAnswer((_) async => []);
+
+        when(
+          () => mockGitHubService.getClosedIssues(
+            owner: 'owner',
+            repo: 'repo',
+            startDate: any(named: 'startDate'),
+            endDate: any(named: 'endDate'),
           ),
         ).thenAnswer((_) async => []);
 

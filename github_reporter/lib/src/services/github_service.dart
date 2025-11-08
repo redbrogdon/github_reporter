@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
+import '../models/issue.dart';
 import '../models/pull_request.dart';
 
 const _maxTries = 5;
@@ -160,5 +161,34 @@ class GitHubService {
       );
     }
     return response.body;
+  }
+
+  /// Gets a list of closed issues for a given repository and date range.
+  Future<List<Issue>> getClosedIssues({
+    required String owner,
+    required String repo,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final query = 'repo:$owner/$repo is:issue is:closed '
+        'closed:${_formatDate(startDate)}..${_formatDate(endDate)}';
+
+    _log.info('Making GitHub API request: search issues with query "$query"');
+
+    final searchUri = Uri.parse(
+      'https://api.github.com/search/issues?q=$query',
+    );
+    final searchResponse = await _sendRequest(searchUri, headers: _headers);
+
+    if (searchResponse.statusCode != 200) {
+      throw Exception(
+        'Failed to search issues: ${searchResponse.statusCode} ${searchResponse.body}',
+      );
+    }
+
+    final searchResult = jsonDecode(searchResponse.body);
+    final issues = searchResult['items'] as List;
+
+    return issues.map((issue) => Issue.fromJson(issue)).toList();
   }
 }

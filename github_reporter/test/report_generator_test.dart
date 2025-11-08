@@ -1,5 +1,7 @@
 import 'package:github_reporter/github_reporter.dart';
+import 'package:github_reporter/src/models/issue.dart';
 import 'package:github_reporter/src/models/pull_request.dart';
+import 'package:github_reporter/src/models/user.dart';
 import 'package:github_reporter/src/services/gemini_service.dart';
 import 'package:github_reporter/src/services/github_service.dart';
 import 'package:mocktail/mocktail.dart';
@@ -46,6 +48,15 @@ void main() {
       ).thenAnswer((_) async => [pr]);
 
       when(
+        () => mockGitHubService.getClosedIssues(
+          owner: 'owner',
+          repo: 'repo',
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      when(
         () => mockGitHubService.getPullRequestDiff(
           owner: 'owner',
           repo: 'repo',
@@ -86,6 +97,61 @@ void main() {
           number: 1,
         ),
       ).called(1);
+    });
+
+    test('generateReport returns a correctly formatted report with reactions',
+        () async {
+      final issue = Issue(
+        number: 1,
+        title: 'Test Issue',
+        htmlUrl: 'https://github.com/owner/repo/issues/1',
+        user: User(login: 'testuser', htmlUrl: 'https://github.com/testuser'),
+        closedAt: DateTime.parse('2025-01-01T12:00:00Z'),
+        reactions: Reactions(
+          totalCount: 1,
+          plusOne: 1,
+          minusOne: 0,
+          laugh: 0,
+          hooray: 0,
+          confused: 0,
+          heart: 0,
+          rocket: 0,
+          eyes: 0,
+        ),
+      );
+
+      when(
+        () => mockGitHubService.getMergedPullRequests(
+          owner: 'owner',
+          repo: 'repo',
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+          excludeAuthors: any(named: 'excludeAuthors'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      when(
+        () => mockGitHubService.getClosedIssues(
+          owner: 'owner',
+          repo: 'repo',
+          startDate: any(named: 'startDate'),
+          endDate: any(named: 'endDate'),
+        ),
+      ).thenAnswer((_) async => [issue]);
+
+      final report = await reportGenerator.generateReport(
+        owner: 'owner',
+        repo: 'repo',
+        startDate: DateTime.parse('2025-01-01'),
+        endDate: DateTime.parse('2025-01-31'),
+      );
+
+      expect(report, contains('## Closed Issues'));
+      expect(
+        report,
+        contains(
+            '* **Reactions:** 1 👍 1'),
+      );
     });
   });
 }

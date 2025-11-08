@@ -81,4 +81,13 @@ Following the header is a list of pull requests in chronological order of when t
 *   **Title:** The title of the pull request.
 *   **Fixes:** A list of issue IDs that the pull request fixes, with links to the issues on GitHub.
 *   **Summary:** A text summary of the changes introduced by the pull request and the rationale for introducing them. This summary should be several sentences long.
+
+### Closed Issues
+
+Following the pull requests is a list of all issues that were closed during the specified time range. Each issue entry includes the following information:
+
+*   **Issue:** The issue number (e.g., #123) as a clickable link to the issue on GitHub.
+*   **Author:** The GitHub username of the author as a clickable link to their GitHub profile.
+*   **Closed At:** The time (Pacific Time, 12-hour clock, hours and minutes only) when the issue was closed.
+*   **Title:** The title of the issue.
 ```
