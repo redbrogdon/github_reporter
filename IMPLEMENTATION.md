@@ -120,10 +120,18 @@ This document outlines the steps to implement the GitHub PR Reporter application
 
 ## Phase 15: Issue Reaction Reporting
 
-- [ ] 1. Update the `Issue` model in `lib/src/models/issue.dart` to include reaction data.
-- [ ] 2. Update the `getClosedIssues` method in `GitHubService` to fetch reaction data for each issue.
-- [ ] 3. In `ReportGenerator`, format and display the reaction data in the "Closed Issues" section of the report.
-- [ ] 4. Update the unit tests for `getClosedIssues` to include reaction data.
+- [x] 1. Update the `Issue` model in `lib/src/models/issue.dart` to include reaction data.
+- [x] 2. Update the `getClosedIssues` method in `GitHubService` to fetch reaction data for each issue.
+- [x] 3. In `ReportGenerator`, format and display the reaction data in the "Closed Issues" section of the report.
+- [x] 4. Update the unit tests for `getClosedIssues` to include reaction data.
+
+## Phase 16: Overall Report Summary
+
+- [ ] 1. Create a new prompt for the Gemini service to generate an overall summary.
+- [ ] 2. Create a new method in `GeminiService` to generate the overall summary.
+- [ ] 3. In `ReportGenerator`, call the new method and add the overall summary to the top of the report.
+- [ ] 4. Update `DESIGN.md` and `USAGE.md` to reflect the new overall summary feature.
+- [ ] 5. Update the unit tests to include the overall summary.
 
 ## Implementation Notes
 

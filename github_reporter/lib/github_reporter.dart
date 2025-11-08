@@ -63,64 +63,74 @@ class ReportGenerator {
 
     _log.info('Found ${closedIssues.length} closed issues.');
 
-    final report = StringBuffer();
-    report.writeln('# GitHub PR Report for $owner/$repo');
-    report.writeln('## ${_formatDateRange(startDate, endDate)}');
-    report.writeln();
+    // Report header
+    final header =
+        '''
+# GitHub PR Report for $owner/$repo
+## ${_formatDateRange(startDate, endDate)}
+''';
+
+    final prBuffer = StringBuffer();
+    prBuffer.writeln('## Merged Pull Requests\n');
 
     if (pullRequests.isEmpty) {
-      report.writeln('No pull requests were merged during this time.');
+      prBuffer.writeln('No pull requests were merged during this time.\n');
     } else {
-      report.writeln('## Merged Pull Requests');
-      report.writeln();
       for (final pr in pullRequests) {
         _log.info('Generating summary for PR #${pr.number}...');
 
-        report.writeln(
-          '### ${_getCommentEmojis(pr.comments)}[PR #${pr.number}](${pr.htmlUrl}): ${pr.title}',
+        final diff = await _githubService.getPullRequestDiff(
+          owner: owner,
+          repo: repo,
+          number: pr.number,
         );
-        report.writeln('* **Author:** [${pr.user.login}](${pr.user.htmlUrl})');
-        report.writeln('* **Merged At:** ${_formatDateTime(pr.mergedAt)}');
-        report.writeln('* **Comments:** ${pr.comments}');
 
-        if (pr.body != null && pr.body!.isNotEmpty) {
-          final diff = await _githubService.getPullRequestDiff(
-            owner: owner,
-            repo: repo,
-            number: pr.number,
-          );
-          final summary = await _geminiService.getSummary(
-            '${pr.body}\n\n$diff',
-          );
-          report.writeln('*   **Summary:** $summary');
-        }
-        report.writeln();
-        _log.info('Finished generating summary for PR #${pr.number}.');
+        final summary = await _geminiService.getSummary(
+          '${pr.body ?? ''}\n\n$diff',
+        );
+
+        prBuffer.writeln('''
+### ${_getCommentEmojis(pr.comments)}[PR #${pr.number}](${pr.htmlUrl}): ${pr.title}
+* **Author:** [${pr.user.login}](${pr.user.htmlUrl})
+* **Merged At:** ${_formatDateTime(pr.mergedAt)}
+* **Comments:** ${pr.comments}
+* **Summary:** $summary
+''');
       }
     }
 
-    if (closedIssues.isNotEmpty) {
-      report.writeln('## Closed Issues');
-      report.writeln();
+    final issueBuffer = StringBuffer();
+    issueBuffer.writeln('## Closed Issues\n');
+
+    if (closedIssues.isEmpty) {
+      issueBuffer.writeln('No issues were closed during this time.\n');
+    } else {
       for (final issue in closedIssues) {
-        report.writeln(
-          '### [Issue #${issue.number}](${issue.htmlUrl}): ${issue.title}',
-        );
-        report.writeln(
-          '* **Author:** [${issue.user.login}](${issue.user.htmlUrl})',
-        );
-        report.writeln('* **Closed At:** ${_formatDateTime(issue.closedAt)}');
+        issueBuffer.writeln('''
+### [Issue #${issue.number}](${issue.htmlUrl}): ${issue.title}
+* **Author:** [${issue.user.login}](${issue.user.htmlUrl})
+* **Closed At:** ${_formatDateTime(issue.closedAt)}
+''');
         if (issue.reactions.totalCount > 0) {
-          report.writeln(
-            '* **Reactions:** **${issue.reactions.totalCount}** -- '
+          issueBuffer.writeln(
+            '* **Reactions:** '
+            '**${issue.reactions.totalCount}** -- '
             '${_getReactionEmojis(issue.reactions)}',
           );
         }
-        report.writeln();
       }
     }
 
-    return report.toString();
+    final overallSummary = await _geminiService.getOverallSummary(
+      '$header\n$prBuffer\n$issueBuffer',
+    );
+
+    return '''
+$header
+$overallSummary\n
+$prBuffer
+$issueBuffer
+''';
   }
 
   String _getReactionEmojis(Reactions reactions) {

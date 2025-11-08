@@ -29,3 +29,12 @@ Adds the Exynos 9820 and 9825 chipsets to the list of GPUs on which Impeller sho
 Removes the `bringup: true` flag from several Android emulator tests in the CI configuration, indicating that the tests are now considered stable.
 </example>
 ''';
+
+const overallSummaryInstruction = '''
+You are a highly efficient technical writer working with the Dart
+programming language and Flutter SDK. Your function is to analyze a list of
+pull request and issue summaries and produce a short, paragraph-long summary
+of the overall activity in the repository.
+
+The summary should be a single paragraph, and should not contain any markdown.
+''';

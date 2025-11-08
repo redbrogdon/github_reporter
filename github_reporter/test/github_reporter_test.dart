@@ -67,6 +67,10 @@ void main() {
         () => mockGeminiService.getSummary(any()),
       ).thenAnswer((_) async => 'Test summary');
 
+      when(
+        () => mockGeminiService.getOverallSummary(any()),
+      ).thenAnswer((_) async => 'Overall test summary');
+
       final report = await reportGenerator.generateReport(
         owner: 'owner',
         repo: 'repo',
@@ -74,6 +78,7 @@ void main() {
         endDate: DateTime.parse('2025-01-31'),
       );
 
+      expect(report, contains('Overall test summary\n'));
       expect(report, contains('# GitHub PR Report for owner/repo'));
       expect(report, contains('## From 2025-01-01 to 2025-01-31'));
       expect(
@@ -86,8 +91,7 @@ void main() {
       );
       expect(report, contains('* **Merged At:** 2025-01-01'));
       expect(report, contains('* **Comments:** 2'));
-      expect(report, contains('*   **Summary:** Test summary'));
-      expect(report, contains('*   **Summary:** Test summary'));
+      expect(report, contains('* **Summary:** Test summary'));
     });
 
     test(
@@ -112,6 +116,10 @@ void main() {
           ),
         ).thenAnswer((_) async => []);
 
+        when(
+          () => mockGeminiService.getOverallSummary(any()),
+        ).thenAnswer((_) async => 'Overall test summary');
+
         final report = await reportGenerator.generateReport(
           owner: 'owner',
           repo: 'repo',
@@ -119,6 +127,7 @@ void main() {
           endDate: DateTime.parse('2025-01-31'),
         );
 
+        expect(report, contains('Overall test summary\n'));
         expect(report, contains('# GitHub PR Report for owner/repo'));
         expect(report, contains('## From 2025-01-01 to 2025-01-31'));
         expect(

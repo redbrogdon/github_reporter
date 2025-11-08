@@ -27,7 +27,7 @@ The application will be structured around the following core components:
 Dedicated service classes will encapsulate interactions with external APIs. Their constructors will accept the necessary API keys.
 
 *   **GitHubService:** This class will handle all communication with the GitHub API. It will utilize the `github` package from `pub.dev`. Instead of fetching all closed pull requests and filtering them locally, it will use the `SearchService` to find merged pull requests within the specified date range directly. This is more efficient as it delegates the filtering to the GitHub API. It will also accept a list of authors to exclude, which will be incorporated into the search query. For each issue returned by the search, it will then fetch the full `PullRequest` object to ensure all necessary data is available. It will also have a `getClosedIssues` method to fetch closed issues, including their reaction data, within the specified date range.
-*   **GeminiService:** This class will manage interactions with the Gemini API. It will use the `google_cloud_ai_generativelanguage_v1beta` package to perform text summarization on pull request content. The system instruction for the Gemini model is defined as a `const` string in a dedicated Dart file (`lib/src/services/prompts.dart`), allowing for compile-time validation and easier management of the prompt. To handle transient errors from the Gemini API, the service will implement a retry mechanism with exponential backoff. It will attempt to generate a summary up to three times before failing.
+*   **GeminiService:** This class will manage interactions with the Gemini API. It will use the `google_cloud_ai_generativelanguage_v1beta` package to perform text summarization on pull request content. The system instruction for the Gemini model is defined as a `const` string in a dedicated Dart file (`lib/src/services/prompts.dart`), allowing for compile-time validation and easier management of the prompt. To handle transient errors from the Gemini API, the service will implement a retry mechanism with exponential backoff. It will attempt to generate a summary up to three times before failing. It will also have a `getOverallSummary` method to generate a high-level summary of all activities in the report.
 
 ## 3. Data Flow
 
@@ -37,8 +37,9 @@ Dedicated service classes will encapsulate interactions with external APIs. Thei
 4.  The `ReportGenerator` class will instantiate and utilize `GitHubService` and `GeminiService`, passing the API keys to their constructors.
 5.  `GitHubService` fetches pull request and closed issue data, including reactions for each issue.
 6.  For each pull request, `GeminiService` generates a summary of changes.
-7.  Finally, the `generateReport` method will format the collected data into a Markdown report and return it as a string.
-8.  The entry point script will either write this string to the file specified by the `--output-file` option or print it to standard output if the option is not provided.
+7.  `GeminiService` generates an overall summary of all activities.
+8.  Finally, the `generateReport` method will format the collected data into a Markdown report and return it as a string.
+9.  The entry point script will either write this string to the file specified by the `--output-file` option or print it to standard output if the option is not provided.
 
 ## 4. Error Handling
 
