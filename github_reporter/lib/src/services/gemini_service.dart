@@ -17,20 +17,22 @@ class GeminiService {
   /// Creates a new instance of [GeminiService] using a Gemini API key.
   factory GeminiService.withApiKey(String apiKey) {
     return GeminiService(
-      GenerativeModel(
-        model: 'gemini-2.5-pro',
-        apiKey: apiKey,
-        systemInstruction: Content.system(systemInstruction),
-      ),
+      GenerativeModel(model: 'gemini-2.5-pro', apiKey: apiKey),
     );
   }
 
   /// Gets a summary of the given text.
-  Future<String> getSummary(String text) async {
+  Future<String> getPullRequestSummary(
+    String title,
+    String body,
+    String diff,
+  ) async {
+    final prompt = createPullRequestSummaryPrompt(title, body, diff);
+
     var retries = 0;
     while (retries < _maxRetries) {
       try {
-        final content = [Content.text(text)];
+        final content = [Content.text(prompt)];
         final response = await _model.generateContent(content);
         return response.text ?? '';
       } catch (e) {
@@ -42,15 +44,19 @@ class GeminiService {
         await Future.delayed(delay);
       }
     }
-    throw Exception('Failed to get summary after $_maxRetries retries.');
+    throw Exception(
+      'Failed to get pull request summary after $_maxRetries retries.',
+    );
   }
 
   /// Gets an overall summary of the given text.
-  Future<String> getOverallSummary(String text) async {
+  Future<String> getOverallSummary(String prs, String issues) async {
+    final prompt = createOverallSummaryPrompt(prs, issues);
+
     var retries = 0;
     while (retries < _maxRetries) {
       try {
-        final content = [Content.text(text)];
+        final content = [Content.text(prompt)];
         final response = await _model.generateContent(content);
         return response.text ?? '';
       } catch (e) {

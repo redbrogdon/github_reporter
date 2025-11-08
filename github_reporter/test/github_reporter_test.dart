@@ -64,11 +64,11 @@ void main() {
       ).thenAnswer((_) async => 'This is a code diff.');
 
       when(
-        () => mockGeminiService.getSummary(any()),
+        () => mockGeminiService.getPullRequestSummary(any(), any(), any()),
       ).thenAnswer((_) async => 'Test summary');
 
       when(
-        () => mockGeminiService.getOverallSummary(any()),
+        () => mockGeminiService.getOverallSummary(any(), any()),
       ).thenAnswer((_) async => 'Overall test summary');
 
       final report = await reportGenerator.generateReport(
@@ -117,7 +117,7 @@ void main() {
         ).thenAnswer((_) async => []);
 
         when(
-          () => mockGeminiService.getOverallSummary(any()),
+          () => mockGeminiService.getOverallSummary(any(), any()),
         ).thenAnswer((_) async => 'Overall test summary');
 
         final report = await reportGenerator.generateReport(

@@ -1,4 +1,5 @@
-const systemInstruction = '''
+String createPullRequestSummaryPrompt(String title, String body, String diff) =>
+    '''
 You are a highly efficient technical writer working with the Dart
 programming language and Flutter SDK. Your function is to analyze GitHub
 pull requests and summarize them for the Dart and Flutter developer
@@ -28,13 +29,53 @@ Adds the Exynos 9820 and 9825 chipsets to the list of GPUs on which Impeller sho
 <example>
 Removes the `bringup: true` flag from several Android emulator tests in the CI configuration, indicating that the tests are now considered stable.
 </example>
+
+Here is the title of the pull request:
+
+<title>
+$title
+</title>
+
+Here is the body:
+
+<description>
+$body
+</description>
+
+Here is a diff of the changes:
+
+<diff>
+$diff
+</diff>
+
+Please respond with your summary of the pull request.
 ''';
 
-const overallSummaryInstruction = '''
+String createOverallSummaryPrompt(String prs, String issues) =>
+    '''
 You are a highly efficient technical writer working with the Dart
 programming language and Flutter SDK. Your function is to analyze a list of
-pull request and issue summaries and produce a short, paragraph-long summary
-of the overall activity in the repository.
+pull request and issue summaries and produce a paragraph that describes 
+the overall changes made to the repo by those pull requests and issue closures.
 
-The summary should be a single paragraph, and should not contain any markdown.
+In particular, you should focus on pull requests that had a lot of comments
+and issues that had a lot of reactions. Pull requests and issues that relate to
+the public API surface of Flutter and language features of the Dart programming
+language such as changes to syntax are also highliy important and should be
+referenced in the summary.
+
+Here is a list of the pull requests that landed in the repository:
+
+<pull_requests>
+$prs
+</pull_requests>
+
+Here is a list of the issues that were closed in the repository:
+
+<issues>
+$issues
+</issues>
+
+Please respond with your paragraph-length summary of the overall changes to
+the repo.
 ''';

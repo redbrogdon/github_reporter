@@ -65,13 +65,11 @@ void main() {
       ).thenAnswer((_) => Future.value('Test diff'));
 
       when(
-        () => mockGeminiService.getSummary(
-          'This is a test PR body.\n\nTest diff',
-        ),
+        () => mockGeminiService.getPullRequestSummary(any(), any(), any()),
       ).thenAnswer((_) async => 'Test summary');
 
       when(
-        () => mockGeminiService.getOverallSummary(any()),
+        () => mockGeminiService.getOverallSummary(any(), any()),
       ).thenAnswer((_) async => 'Overall test summary');
 
       final report = await reportGenerator.generateReport(
@@ -145,7 +143,7 @@ void main() {
         ).thenAnswer((_) async => [issue]);
 
         when(
-          () => mockGeminiService.getOverallSummary(any()),
+          () => mockGeminiService.getOverallSummary(any(), any()),
         ).thenAnswer((_) async => 'Overall test summary');
 
         final report = await reportGenerator.generateReport(

@@ -85,8 +85,10 @@ class ReportGenerator {
           number: pr.number,
         );
 
-        final summary = await _geminiService.getSummary(
-          '${pr.body ?? ''}\n\n$diff',
+        final summary = await _geminiService.getPullRequestSummary(
+          pr.title,
+          pr.body ?? '',
+          diff,
         );
 
         prBuffer.writeln('''
@@ -122,7 +124,8 @@ class ReportGenerator {
     }
 
     final overallSummary = await _geminiService.getOverallSummary(
-      '$header\n$prBuffer\n$issueBuffer',
+      prBuffer.toString(),
+      issueBuffer.toString(),
     );
 
     return '''
