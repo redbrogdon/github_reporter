@@ -34,7 +34,7 @@ class GeminiService {
       try {
         final content = [Content.text(prompt)];
         final response = await _model.generateContent(content);
-        return response.text ?? '';
+        return response.text?.trim() ?? '';
       } catch (e) {
         retries++;
         if (retries >= _maxRetries) {
@@ -58,7 +58,7 @@ class GeminiService {
       try {
         final content = [Content.text(prompt)];
         final response = await _model.generateContent(content);
-        return response.text ?? '';
+        return response.text?.trim() ?? '';
       } catch (e) {
         retries++;
         if (retries >= _maxRetries) {

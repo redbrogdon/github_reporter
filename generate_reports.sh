@@ -38,7 +38,7 @@ do
   
   # Append to the combined file
   cat "$FILENAME" >> "$COMBINED_FILENAME"
-  echo -e "\n\n" >> "$COMBINED_FILENAME"
+  echo -e "\n" >> "$COMBINED_FILENAME"
   
   echo "Report saved to $FILENAME"
 done

@@ -1,3 +1,4 @@
+import 'package:github_reporter/src/models/pull_request.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
@@ -40,6 +41,7 @@ class ReportGenerator {
     List<String> excludeAuthors = const [],
   }) async {
     await initializeDateFormatting('en_US', null);
+
     _log.info(
       'Generating report for $owner/$repo from $startDate to $endDate...',
     );
@@ -63,65 +65,28 @@ class ReportGenerator {
 
     _log.info('Found ${closedIssues.length} closed issues.');
 
-    // Report header
-    final header =
-        '''
-# GitHub PR Report for $owner/$repo
-## ${_formatDateRange(startDate, endDate)}
-''';
-
     final prBuffer = StringBuffer();
-    prBuffer.writeln('## Merged Pull Requests\n');
+    prBuffer.writeln('## Pull requests');
+    prBuffer.writeln('');
 
     if (pullRequests.isEmpty) {
-      prBuffer.writeln('No pull requests were merged during this time.\n');
+      prBuffer.writeln('No pull requests were merged during this time.');
     } else {
       for (final pr in pullRequests) {
-        _log.info('Generating summary for PR #${pr.number}...');
-
-        final diff = await _githubService.getPullRequestDiff(
-          owner: owner,
-          repo: repo,
-          number: pr.number,
-        );
-
-        final summary = await _geminiService.getPullRequestSummary(
-          pr.title,
-          pr.body ?? '',
-          diff,
-        );
-
-        prBuffer.writeln('''
-### ${_getCommentEmojis(pr.comments)}[PR #${pr.number}](${pr.htmlUrl}): ${pr.title}
-* **Author:** [${pr.user.login}](${pr.user.htmlUrl})
-* **Merged At:** ${_formatDateTime(pr.mergedAt)}
-* **Comments:** ${pr.comments}
-* **Summary:** $summary
-''');
+        prBuffer.write(await generatePullRequestEntry(owner, repo, pr));
+        prBuffer.writeln();
       }
     }
 
     final issueBuffer = StringBuffer();
-    issueBuffer.writeln('## Closed Issues\n');
+    issueBuffer.writeln('## Issues');
+    issueBuffer.writeln('');
 
     if (closedIssues.isEmpty) {
-      issueBuffer.writeln('No issues were closed during this time.\n');
+      issueBuffer.writeln('No issues were closed during this time.');
     } else {
       for (final issue in closedIssues) {
-        issueBuffer.write('''
-### [Issue #${issue.number}](${issue.htmlUrl}): ${issue.title}
-* **Author:** [${issue.user.login}](${issue.user.htmlUrl})
-* **Closed At:** ${_formatDateTime(issue.closedAt)}
-''');
-
-        if (issue.reactions.totalCount > 0) {
-          issueBuffer.writeln(
-            '* **Reactions:** '
-            '**${issue.reactions.totalCount}** -- '
-            '${_getReactionEmojis(issue.reactions)}',
-          );
-        }
-
+        issueBuffer.write(await generateIssueEntry(issue));
         issueBuffer.writeln();
       }
     }
@@ -131,12 +96,61 @@ class ReportGenerator {
       issueBuffer.toString(),
     );
 
-    return '''
-$header
-$overallSummary\n
-$prBuffer
-$issueBuffer
+    return '''# GitHub PR Report for $owner/$repo
+_${_formatDateRange(startDate, endDate)}_
+
+$overallSummary
+
+${prBuffer.toString().trim()}
+${issueBuffer.toString().trim()}
 ''';
+  }
+
+  Future<String> generatePullRequestEntry(
+    String owner,
+    String repo,
+    PullRequest pr,
+  ) async {
+    _log.info('Generating summary for PR #${pr.number}...');
+
+    final diff = await _githubService.getPullRequestDiff(
+      owner: owner,
+      repo: repo,
+      number: pr.number,
+    );
+
+    final summary = await _geminiService.getPullRequestSummary(
+      pr.title,
+      pr.body ?? '',
+      diff,
+    );
+
+    return '### ${_getCommentEmojis(pr.comments)}[PR #${pr.number}](${pr.htmlUrl}): ${pr.title}\n'
+        '* **Author:** [${pr.user.login}](${pr.user.htmlUrl})\n'
+        '* **Merged At:** ${_formatDateTime(pr.mergedAt)}\n'
+        '* **Comments:** ${pr.comments}\n'
+        '* **Summary:** $summary\n';
+  }
+
+  Future<String> generateIssueEntry(Issue issue) async {
+    final issueBuffer = StringBuffer();
+    issueBuffer.writeln(
+      '### [Issue #${issue.number}](${issue.htmlUrl}): ${issue.title}',
+    );
+    issueBuffer.writeln(
+      '* **Author:** [${issue.user.login}](${issue.user.htmlUrl})',
+    );
+    issueBuffer.writeln('* **Closed At:** ${_formatDateTime(issue.closedAt)}');
+
+    if (issue.reactions.totalCount > 0) {
+      issueBuffer.writeln(
+        '* **Reactions:** '
+        '**${issue.reactions.totalCount}** -- '
+        '${_getReactionEmojis(issue.reactions)}',
+      );
+    }
+
+    return issueBuffer.toString();
   }
 
   String _getReactionEmojis(Reactions reactions) {
@@ -179,8 +193,9 @@ $issueBuffer
   }
 
   String _formatDateRange(DateTime startDate, DateTime endDate) {
-    final start = DateFormat('yyyy-MM-dd').format(startDate);
-    final end = DateFormat('yyyy-MM-dd').format(endDate);
+    final start = _formatDateTime(startDate);
+    final end = _formatDateTime(endDate);
+
     if (start == end) {
       return 'From $start';
     } else {
@@ -190,7 +205,7 @@ $issueBuffer
 
   String _formatDateTime(DateTime? dateTime) {
     if (dateTime == null) {
-      return 'N/A';
+      return '';
     }
     return DateFormat('yyyy-MM-dd').format(dateTime);
   }
