@@ -135,13 +135,13 @@ This document outlines the steps to implement the GitHub PR Reporter application
 
 ## Phase 17: Hacker News Service
 
-- [ ] 1. Create new data models for Hacker News stories and comments in `lib/src/models/`.
-- [ ] 2. Create a new `HackerNewsService` class in `lib/src/services/hacker_news_service.dart`.
-- [ ] 3. Implement a method in `HackerNewsService` to get the top stories from the Hacker News API.
-- [ ] 4. Implement a method in `HackerNewsService` to get the details of a story, including its comments.
-- [ ] 5. Add unit tests for the `HackerNewsService`.
-- [ ] 6. Integrate the `HackerNewsService` into the `ReportGenerator` to include a new "Hacker News" section in the report.
-- [ ] 7. Update `DESIGN.md` and `USAGE.md` to reflect the new Hacker News integration.
+- [x] 1. Create new data models for Hacker News stories and comments in `lib/src/models/`.
+- [x] 2. Create a new `HackerNewsService` class in `lib/src/services/hacker_news_service.dart`.
+- [x] 3. Implement a method in `HackerNewsService` to get the top stories from the Hacker News API.
+- [x] 4. Implement a method in `HackerNewsService` to get the details of a story, including its comments.
+- [x] 5. Add unit tests for the `HackerNewsService`.
+- [x] 6. Integrate the `HackerNewsService` into the `ReportGenerator` to include a new "Hacker News" section in the report.
+- [x] 7. Update `DESIGN.md` and `USAGE.md` to reflect the new Hacker News integration.
 
 ## Implementation Notes
 

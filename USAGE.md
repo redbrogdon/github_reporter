@@ -41,6 +41,7 @@ dart run github_reporter.dart --repo <owner/repo> --github-token <YOUR_GITHUB_PA
 *   `--help`: Show a brief description of the app's functionality, a sample invocation, and then each of the flags/options and what they do.
 *   `--verbose`: Enable verbose logging.
 *   `--output-file`: The path to the file where the report will be written. If not provided, the report will be printed to the console. If the file already exists, it will be overwritten.
+*   `--hacker-news`: Include a section with the top 5 stories from Hacker News.
 
 ### Environment Variables
 
@@ -90,4 +91,13 @@ Following the pull requests is a list of all issues that were closed during the 
 *   **Author:** The GitHub username of the author as a clickable link to their GitHub profile.
 *   **Closed At:** The time (Pacific Time, 12-hour clock, hours and minutes only) when the issue was closed.
 *   **Title:** The title of the issue.
+
+### Hacker News
+
+If the `--hacker-news` flag is enabled, the report will include a section with the top 5 stories from Hacker News. Each story entry includes the following information:
+
+*   **Title:** The title of the story as a clickable link to the story on Hacker News.
+*   **Author:** The Hacker News username of the author.
+*   **Score:** The score of the story.
+*   **Comments:** The number of comments on the story.
 ```

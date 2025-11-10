@@ -1,4 +1,3 @@
-import 'package:github_reporter/src/models/pull_request.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
@@ -6,20 +5,23 @@ import 'package:logging/logging.dart';
 import 'src/models/issue.dart';
 import 'src/services/gemini_service.dart';
 import 'src/services/github_service.dart';
+import 'src/services/hacker_news_service.dart';
 
 /// A class that generates a GitHub PR report.
 class ReportGenerator {
   final GitHubService _githubService;
   final GeminiService _geminiService;
+  final HackerNewsService _hackerNewsService;
   final _log = Logger('GeminiService');
 
   /// Creates a new instance of [ReportGenerator].
   ReportGenerator({
     required GitHubService githubService,
     required GeminiService geminiService,
-    bool verbose = false,
+    required HackerNewsService hackerNewsService,
   }) : _githubService = githubService,
-       _geminiService = geminiService;
+       _geminiService = geminiService,
+       _hackerNewsService = hackerNewsService;
 
   /// Creates a new instance of [ReportGenerator] using a GitHub token and a Gemini API key.
   factory ReportGenerator.withTokens({
@@ -29,19 +31,47 @@ class ReportGenerator {
     return ReportGenerator(
       githubService: GitHubService.withToken(githubToken),
       geminiService: GeminiService.withApiKey(geminiApiKey),
+      hackerNewsService: HackerNewsService(),
     );
   }
 
-  /// Generates a GitHub PR report for a given repository and date range.
   Future<String> generateReport({
+    required List<String> repoSlugs,
+    required DateTime startDate,
+    required DateTime endDate,
+    List<String> excludedAuthors = const [],
+    bool skipHackerNews = false,
+  }) async {
+    final buffer = StringBuffer();
+
+    for (final slug in repoSlugs) {
+      final splits = slug.split('/');
+      final report = await generateSingleRepoReport(
+        owner: splits[0],
+        repo: splits[1],
+        startDate: startDate,
+        endDate: endDate,
+        excludedAuthors: excludedAuthors,
+      );
+      buffer.writeln(report);
+    }
+
+    final hackerNewsSection = skipHackerNews
+        ? ''
+        : await _generateHackerNewsSection();
+
+    return '$buffer\n$hackerNewsSection\n';
+  }
+
+  /// Generates a GitHub PR report for a given repository and date range.
+  Future<String> generateSingleRepoReport({
     required String owner,
     required String repo,
     required DateTime startDate,
     required DateTime endDate,
-    List<String> excludeAuthors = const [],
+    List<String> excludedAuthors = const [],
   }) async {
     await initializeDateFormatting('en_US', null);
-
     _log.info(
       'Generating report for $owner/$repo from $startDate to $endDate...',
     );
@@ -51,7 +81,7 @@ class ReportGenerator {
       repo: repo,
       startDate: startDate,
       endDate: endDate,
-      excludeAuthors: excludeAuthors,
+      excludeAuthors: excludedAuthors,
     );
 
     _log.info('Found ${pullRequests.length} merged pull requests.');
@@ -65,29 +95,63 @@ class ReportGenerator {
 
     _log.info('Found ${closedIssues.length} closed issues.');
 
+    // Report header
+    final header =
+        '''
+# GitHub PR Report for $owner/$repo
+## ${_formatDateRange(startDate, endDate)}
+''';
+
     final prBuffer = StringBuffer();
-    prBuffer.writeln('## Pull requests');
-    prBuffer.writeln('');
+    prBuffer.writeln('## Merged Pull Requests\n');
 
     if (pullRequests.isEmpty) {
-      prBuffer.writeln('No pull requests were merged during this time.');
+      prBuffer.writeln('No pull requests were merged during this time.\n');
     } else {
       for (final pr in pullRequests) {
-        prBuffer.write(await generatePullRequestEntry(owner, repo, pr));
-        prBuffer.writeln();
+        _log.info('Generating summary for PR #${pr.number}...');
+
+        final diff = await _githubService.getPullRequestDiff(
+          owner: owner,
+          repo: repo,
+          number: pr.number,
+        );
+
+        final summary = await _geminiService.getPullRequestSummary(
+          pr.title,
+          pr.body ?? '',
+          diff,
+        );
+
+        prBuffer.writeln('''
+### ${_getCommentEmojis(pr.comments)}[PR #${pr.number}](${pr.htmlUrl}): ${pr.title}
+* **Author:** [${pr.user.login}](${pr.user.htmlUrl})
+* **Merged At:** ${_formatDateTime(pr.mergedAt)}
+* **Comments:** ${pr.comments}
+* **Summary:** $summary
+''');
       }
     }
 
     final issueBuffer = StringBuffer();
-    issueBuffer.writeln('## Issues');
-    issueBuffer.writeln('');
+    issueBuffer.writeln('## Closed Issues\n');
 
     if (closedIssues.isEmpty) {
-      issueBuffer.writeln('No issues were closed during this time.');
+      issueBuffer.writeln('No issues were closed during this time.\n');
     } else {
       for (final issue in closedIssues) {
-        issueBuffer.write(await generateIssueEntry(issue));
-        issueBuffer.writeln();
+        issueBuffer.write('''
+### [Issue #${issue.number}](${issue.htmlUrl}): ${issue.title}
+* **Author:** [${issue.user.login}](${issue.user.htmlUrl})
+* **Closed At:** ${_formatDateTime(issue.closedAt)}
+''');
+        if (issue.reactions.totalCount > 0) {
+          issueBuffer.writeln(
+            '* **Reactions:** '
+            '**${issue.reactions.totalCount}** -- '
+            '${_getReactionEmojis(issue.reactions)}',
+          );
+        }
       }
     }
 
@@ -96,61 +160,34 @@ class ReportGenerator {
       issueBuffer.toString(),
     );
 
-    return '''# GitHub PR Report for $owner/$repo
-_${_formatDateRange(startDate, endDate)}_
-
-$overallSummary
-
-${prBuffer.toString().trim()}
-${issueBuffer.toString().trim()}
-''';
+    return '$header\n$overallSummary\n\n$prBuffer\n$issueBuffer';
   }
 
-  Future<String> generatePullRequestEntry(
-    String owner,
-    String repo,
-    PullRequest pr,
-  ) async {
-    _log.info('Generating summary for PR #${pr.number}...');
+  Future<String> _generateHackerNewsSection() async {
+    _log.info('Fetching top Hacker News stories...');
+    final hnBuffer = StringBuffer();
+    hnBuffer.writeln('## Top Hacker News Stories\n');
 
-    final diff = await _githubService.getPullRequestDiff(
-      owner: owner,
-      repo: repo,
-      number: pr.number,
-    );
+    try {
+      final topStoryIds = await _hackerNewsService.getTopStoryIds();
+      final top5StoryIds = topStoryIds.take(25);
 
-    final summary = await _geminiService.getPullRequestSummary(
-      pr.title,
-      pr.body ?? '',
-      diff,
-    );
-
-    return '### ${_getCommentEmojis(pr.comments)}[PR #${pr.number}](${pr.htmlUrl}): ${pr.title}\n'
-        '* **Author:** [${pr.user.login}](${pr.user.htmlUrl})\n'
-        '* **Merged At:** ${_formatDateTime(pr.mergedAt)}\n'
-        '* **Comments:** ${pr.comments}\n'
-        '* **Summary:** $summary\n';
-  }
-
-  Future<String> generateIssueEntry(Issue issue) async {
-    final issueBuffer = StringBuffer();
-    issueBuffer.writeln(
-      '### [Issue #${issue.number}](${issue.htmlUrl}): ${issue.title}',
-    );
-    issueBuffer.writeln(
-      '* **Author:** [${issue.user.login}](${issue.user.htmlUrl})',
-    );
-    issueBuffer.writeln('* **Closed At:** ${_formatDateTime(issue.closedAt)}');
-
-    if (issue.reactions.totalCount > 0) {
-      issueBuffer.writeln(
-        '* **Reactions:** '
-        '**${issue.reactions.totalCount}** -- '
-        '${_getReactionEmojis(issue.reactions)}',
-      );
+      for (final id in top5StoryIds) {
+        final story = await _hackerNewsService.getStory(id);
+        hnBuffer.writeln(
+          '### [${story.title ?? 'No title'}](${story.url ?? ''})',
+        );
+        hnBuffer.writeln(
+          '* **Author:** ${story.by} | **Score:** ${story.score} | **Comments:** ${story.descendants}',
+        );
+        hnBuffer.writeln('');
+      }
+    } catch (e) {
+      _log.warning('Could not fetch Hacker News stories: $e');
+      hnBuffer.writeln('Could not fetch Hacker News stories.');
     }
 
-    return issueBuffer.toString();
+    return hnBuffer.toString();
   }
 
   String _getReactionEmojis(Reactions reactions) {
@@ -193,9 +230,8 @@ ${issueBuffer.toString().trim()}
   }
 
   String _formatDateRange(DateTime startDate, DateTime endDate) {
-    final start = _formatDateTime(startDate);
-    final end = _formatDateTime(endDate);
-
+    final start = DateFormat('yyyy-MM-dd').format(startDate);
+    final end = DateFormat('yyyy-MM-dd').format(endDate);
     if (start == end) {
       return 'From $start';
     } else {
@@ -205,7 +241,7 @@ ${issueBuffer.toString().trim()}
 
   String _formatDateTime(DateTime? dateTime) {
     if (dateTime == null) {
-      return '';
+      return 'N/A';
     }
     return DateFormat('yyyy-MM-dd').format(dateTime);
   }

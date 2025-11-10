@@ -4,6 +4,7 @@ import 'package:github_reporter/src/models/pull_request.dart';
 import 'package:github_reporter/src/models/user.dart';
 import 'package:github_reporter/src/services/gemini_service.dart';
 import 'package:github_reporter/src/services/github_service.dart';
+import 'package:github_reporter/src/services/hacker_news_service.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -11,18 +12,23 @@ class MockGitHubService extends Mock implements GitHubService {}
 
 class MockGeminiService extends Mock implements GeminiService {}
 
+class MockHackerNewsService extends Mock implements HackerNewsService {}
+
 void main() {
   group('ReportGenerator', () {
     late ReportGenerator reportGenerator;
     late MockGitHubService mockGitHubService;
     late MockGeminiService mockGeminiService;
+    late MockHackerNewsService mockHackerNewsService;
 
     setUp(() {
       mockGitHubService = MockGitHubService();
       mockGeminiService = MockGeminiService();
+      mockHackerNewsService = MockHackerNewsService();
       reportGenerator = ReportGenerator(
         githubService: mockGitHubService,
         geminiService: mockGeminiService,
+        hackerNewsService: mockHackerNewsService,
       );
     });
 
@@ -72,7 +78,7 @@ void main() {
         () => mockGeminiService.getOverallSummary(any(), any()),
       ).thenAnswer((_) async => 'Overall test summary');
 
-      final report = await reportGenerator.generateReport(
+      final report = await reportGenerator.generateSingleRepoReport(
         owner: 'owner',
         repo: 'repo',
         startDate: DateTime.parse('2025-01-01'),
@@ -146,7 +152,7 @@ void main() {
           () => mockGeminiService.getOverallSummary(any(), any()),
         ).thenAnswer((_) async => 'Overall test summary');
 
-        final report = await reportGenerator.generateReport(
+        final report = await reportGenerator.generateSingleRepoReport(
           owner: 'owner',
           repo: 'repo',
           startDate: DateTime.parse('2025-01-01'),
