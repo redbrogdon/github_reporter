@@ -143,6 +143,18 @@ This document outlines the steps to implement the GitHub PR Reporter application
 - [x] 6. Integrate the `HackerNewsService` into the `ReportGenerator` to include a new "Hacker News" section in the report.
 - [x] 7. Update `DESIGN.md` and `USAGE.md` to reflect the new Hacker News integration.
 
+## Phase 18: Multi-Report Summarization
+
+- [ ] 1. Create a new prompt for the Gemini service to generate a summary of
+      summaries from multiple reports.
+- [ ] 2. Create a new method in `GeminiService` to generate the multi-report
+      summary.
+- [ ] 3. In `ReportGenerator`, call the new method and add the multi-report
+      summary to the top of the combined report.
+- [ ] 4. Update `DESIGN.md` and `USAGE.md` to reflect the new multi-report
+      summary feature.
+- [ ] 5. Update the unit tests to include the multi-report summary.
+
 ## Implementation Notes
 
 *   **2025-11-03:** Initialized a new Dart console application using `dart create`. Added `args`, `github`, and `google_generative_ai` as dependencies, and `test` and `mocktail` as dev dependencies. Created the initial directory and file structure for the services.
@@ -169,3 +181,4 @@ This document outlines the steps to implement the GitHub PR Reporter application
 -   **2025-11-06:** Implemented filtering of pull requests by author using the `--exclude-author` CLI option.
 -   **2025-11-06:** Implemented clickable pull request IDs and Pacific Time formatting for `Merged At` times in the report.
 -   **2025-11-06:** Made the author's name in the report a clickable link to their GitHub profile.
+-   **2025-11-11:** Added the `summarizeMultiReport` method to `GeminiService` and the `createMultiReportSummaryPrompt` to `prompts.dart` to support summarizing summaries from multiple reports.

@@ -70,4 +70,25 @@ class GeminiService {
     }
     throw Exception('Failed to get summary after $_maxRetries retries.');
   }
+
+  Future<String> summarizeMultiReport(String summaries) async {
+    final prompt = createMultiReportSummaryPrompt(summaries);
+
+    var retries = 0;
+    while (retries < _maxRetries) {
+      try {
+        final content = [Content.text(prompt)];
+        final response = await _model.generateContent(content);
+        return response.text?.trim() ?? '';
+      } catch (e) {
+        retries++;
+        if (retries >= _maxRetries) {
+          rethrow;
+        }
+        final delay = Duration(seconds: pow(2, retries).toInt());
+        await Future.delayed(delay);
+      }
+    }
+    throw Exception('Failed to get summary after $_maxRetries retries.');
+  }
 }
