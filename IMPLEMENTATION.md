@@ -145,15 +145,15 @@ This document outlines the steps to implement the GitHub PR Reporter application
 
 ## Phase 18: Multi-Report Summarization
 
-- [ ] 1. Create a new prompt for the Gemini service to generate a summary of
+- [x] 1. Create a new prompt for the Gemini service to generate a summary of
       summaries from multiple reports.
-- [ ] 2. Create a new method in `GeminiService` to generate the multi-report
+- [x] 2. Create a new method in `GeminiService` to generate the multi-report
       summary.
-- [ ] 3. In `ReportGenerator`, call the new method and add the multi-report
+- [x] 3. In `ReportGenerator`, call the new method and add the multi-report
       summary to the top of the combined report.
-- [ ] 4. Update `DESIGN.md` and `USAGE.md` to reflect the new multi-report
+- [x] 4. Update `DESIGN.md` and `USAGE.md` to reflect the new multi-report
       summary feature.
-- [ ] 5. Update the unit tests to include the multi-report summary.
+- [x] 5. Update the unit tests to include the multi-report summary.
 
 ## Implementation Notes
 

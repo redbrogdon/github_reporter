@@ -44,8 +44,8 @@ void main() {
 
       when(
         () => mockGitHubService.getMergedPullRequests(
-          owner: 'owner',
-          repo: 'repo',
+          owner: any(named: 'owner'),
+          repo: any(named: 'repo'),
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
           excludeAuthors: any(named: 'excludeAuthors'),
@@ -54,8 +54,8 @@ void main() {
 
       when(
         () => mockGitHubService.getClosedIssues(
-          owner: 'owner',
-          repo: 'repo',
+          owner: any(named: 'owner'),
+          repo: any(named: 'repo'),
           startDate: any(named: 'startDate'),
           endDate: any(named: 'endDate'),
         ),
@@ -63,8 +63,8 @@ void main() {
 
       when(
         () => mockGitHubService.getPullRequestDiff(
-          owner: 'owner',
-          repo: 'repo',
+          owner: any(named: 'owner'),
+          repo: any(named: 'repo'),
           number: any(named: 'number'),
         ),
       ).thenAnswer((_) async => 'This is a code diff.');
@@ -75,16 +75,20 @@ void main() {
 
       when(
         () => mockGeminiService.getOverallSummary(any(), any()),
-      ).thenAnswer((_) async => 'Overall test summary');
+      ).thenAnswer((_) async => 'Overall test summary for single repo');
 
-      final report = await reportGenerator.generateSingleRepoReport(
-        owner: 'owner',
-        repo: 'repo',
+      when(
+        () => mockGeminiService.summarizeMultiReport(any()),
+      ).thenAnswer((_) async => 'Multi-report overall summary');
+
+      final report = await reportGenerator.generateReport(
+        repoSlugs: ['owner/repo', 'owner2/repo2'],
         startDate: DateTime.parse('2025-01-01'),
         endDate: DateTime.parse('2025-01-31'),
       );
 
-      expect(report, contains('Overall test summary\n'));
+      expect(report, startsWith('# Overall Summary\nMulti-report overall summary\n\n'));
+      expect(report, contains('Overall test summary for single repo\n'));
       expect(report, contains('# GitHub PR Report for owner/repo'));
       expect(report, contains('## From 2025-01-01 to 2025-01-31'));
       expect(
@@ -95,7 +99,7 @@ void main() {
         report,
         contains('* **Author:** [testuser](https://github.com/testuser)'),
       );
-      expect(report, contains('* **Merged At:** 2025-01-01'));
+      expect(report, contains('* **Merged At:** 2025-01-01 04:00 AM'));
       expect(report, contains('* **Comments:** 2'));
       expect(report, contains('* **Summary:** Test summary'));
     });
@@ -105,8 +109,8 @@ void main() {
       () async {
         when(
           () => mockGitHubService.getMergedPullRequests(
-            owner: 'owner',
-            repo: 'repo',
+            owner: any(named: 'owner'),
+            repo: any(named: 'repo'),
             startDate: any(named: 'startDate'),
             endDate: any(named: 'endDate'),
             excludeAuthors: any(named: 'excludeAuthors'),
@@ -115,8 +119,8 @@ void main() {
 
         when(
           () => mockGitHubService.getClosedIssues(
-            owner: 'owner',
-            repo: 'repo',
+            owner: any(named: 'owner'),
+            repo: any(named: 'repo'),
             startDate: any(named: 'startDate'),
             endDate: any(named: 'endDate'),
           ),
@@ -124,16 +128,20 @@ void main() {
 
         when(
           () => mockGeminiService.getOverallSummary(any(), any()),
-        ).thenAnswer((_) async => 'Overall test summary');
+        ).thenAnswer((_) async => 'Overall test summary for single repo');
 
-        final report = await reportGenerator.generateSingleRepoReport(
-          owner: 'owner',
-          repo: 'repo',
+        when(
+          () => mockGeminiService.summarizeMultiReport(any()),
+        ).thenAnswer((_) async => 'Multi-report overall summary');
+
+        final report = await reportGenerator.generateReport(
+          repoSlugs: ['owner/repo'],
           startDate: DateTime.parse('2025-01-01'),
           endDate: DateTime.parse('2025-01-31'),
         );
 
-        expect(report, contains('Overall test summary\n'));
+        expect(report, startsWith('# Overall Summary\nMulti-report overall summary\n\n'));
+        expect(report, contains('Overall test summary for single repo\n'));
         expect(report, contains('# GitHub PR Report for owner/repo'));
         expect(report, contains('## From 2025-01-01 to 2025-01-31'));
         expect(

@@ -67,6 +67,10 @@ This will generate a combined report of all pull requests merged in the `flutter
 
 The generated report is in Markdown format. The report is structured as follows:
 
+### Overall Summary
+
+The report begins with a paragraph-length summary of activity across all repositories included in the report. This summary focuses on pull requests with many comments, fundamental changes, and issues with many reactions.
+
 ### Header
 
 The report starts with a header that includes the name of the repository and the date range of the report.
@@ -77,7 +81,7 @@ Following the header is a list of pull requests in chronological order of when t
 
 *   **Pull Request:** The pull request number (e.g., #123) as a clickable link to the pull request on GitHub.
 *   **Author:** The GitHub username of the author as a clickable link to their GitHub profile.
-*   **Merged At:** The time (in `YYYY-MM-DD` format) when the pull request was merged.
+*   **Merged At:** The time (in `YYYY-MM-DD hh:mm a` Pacific Time) when the pull request was merged.
 *   **Comments:** The number of comments on the pull request.
 *   **Title:** The title of the pull request.
 *   **Fixes:** A list of issue IDs that the pull request fixes, with links to the issues on GitHub.

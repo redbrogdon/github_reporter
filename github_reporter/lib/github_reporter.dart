@@ -42,7 +42,7 @@ class ReportGenerator {
     List<String> excludedAuthors = const [],
     bool skipHackerNews = false,
   }) async {
-    final buffer = StringBuffer();
+    final List<String> individualReports = [];
 
     for (final slug in repoSlugs) {
       final splits = slug.split('/');
@@ -53,14 +53,24 @@ class ReportGenerator {
         endDate: endDate,
         excludedAuthors: excludedAuthors,
       );
-      buffer.writeln(report);
+      individualReports.add(report);
     }
+
+    final multiReportSummary =
+        await _geminiService.summarizeMultiReport(individualReports.join('\n\n'));
 
     final hackerNewsSection = skipHackerNews
         ? ''
         : await _generateHackerNewsSection();
 
-    return '$buffer\n$hackerNewsSection\n';
+    final buffer = StringBuffer();
+    buffer.writeln('# Overall Summary');
+    buffer.writeln(multiReportSummary);
+    buffer.writeln('\n');
+    buffer.writeln(individualReports.join('\n'));
+    buffer.writeln('\n$hackerNewsSection\n');
+
+    return buffer.toString();
   }
 
   /// Generates a GitHub PR report for a given repository and date range.
@@ -247,6 +257,7 @@ class ReportGenerator {
     if (dateTime == null) {
       return 'N/A';
     }
-    return DateFormat('yyyy-MM-dd').format(dateTime);
+    final pacificTime = dateTime.toUtc().subtract(const Duration(hours: 8)); // UTC-8 for Pacific Time
+    return DateFormat('yyyy-MM-dd hh:mm a').format(pacificTime);
   }
 }
