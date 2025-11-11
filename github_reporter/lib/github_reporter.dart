@@ -152,6 +152,8 @@ class ReportGenerator {
             '${_getReactionEmojis(issue.reactions)}',
           );
         }
+
+        issueBuffer.writeln();
       }
     }
 
@@ -167,7 +169,6 @@ class ReportGenerator {
     _log.info('Fetching top Hacker News stories...');
     final hnBuffer = StringBuffer();
     hnBuffer.writeln('## Top Hacker News Stories\n');
-
     try {
       final topStoryIds = await _hackerNewsService.getTopStoryIds();
       final top5StoryIds = topStoryIds.take(25);
@@ -178,7 +179,10 @@ class ReportGenerator {
           '### [${story.title ?? 'No title'}](${story.url ?? ''})',
         );
         hnBuffer.writeln(
-          '* **Author:** ${story.by} | **Score:** ${story.score} | **Comments:** ${story.descendants}',
+          '* **Author:** [${story.by}]'
+          '(https://news.ycombinator.com/user?id=${story.by}) | '
+          '**Score:** ${story.score} | **Comments:** [${story.descendants}]'
+          '(https://news.ycombinator.com/item?id=${story.id})',
         );
         hnBuffer.writeln('');
       }

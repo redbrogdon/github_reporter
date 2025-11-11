@@ -170,7 +170,8 @@ class GitHubService {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    final query = 'repo:$owner/$repo is:issue is:closed '
+    final query =
+        'repo:$owner/$repo is:issue is:closed '
         'closed:${_formatDate(startDate)}..${_formatDate(endDate)}';
 
     _log.info('Making GitHub API request: search issues with query "$query"');

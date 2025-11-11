@@ -23,8 +23,9 @@ class Issue {
       title: json['title'],
       htmlUrl: json['html_url'],
       user: User.fromJson(json['user']),
-      closedAt:
-          json['closed_at'] != null ? DateTime.parse(json['closed_at']) : null,
+      closedAt: json['closed_at'] != null
+          ? DateTime.parse(json['closed_at'])
+          : null,
       reactions: Reactions.fromJson(json['reactions']),
     );
   }
