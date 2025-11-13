@@ -9,7 +9,7 @@ import '../models/issue.dart';
 import '../models/pull_request.dart';
 
 const _maxTries = 5;
-const _baseDelay = 60;
+const _baseDelay = 30;
 
 /// An exception that is thrown when the GitHub API rate limit is exceeded.
 class RateLimitException implements Exception {
@@ -50,29 +50,18 @@ class GitHubService {
     var tries = 0;
 
     while (tries < _maxTries) {
-      try {
-        final response = await _client.get(uri, headers: headers);
+      final response = await _client.get(uri, headers: headers);
 
-        if (response.statusCode == 200) {
-          return response;
-        } else if (response.statusCode == 403) {
-          tries++;
-          if (tries > _maxTries) {
-            throw RateLimitException(
-              'Failed to get response from GitHub API after $_maxTries tries.',
-            );
-          }
-          final delay = pow(2, tries).floor() * _baseDelay;
-          _log.warning('Rate limit exceeded. Retrying in $delay seconds...');
-          await Future.delayed(Duration(seconds: delay));
-        } else {
-          throw Exception(response.body);
-        }
-      } catch (e) {
-        if (e is RateLimitException) rethrow;
-        throw Exception('Request failed: $e');
+      if (response.statusCode != 403) {
+        return response;
       }
+
+      final delay = pow(2, tries).floor() * _baseDelay;
+      _log.warning('Rate limit exceeded. Retrying in $delay seconds...');
+      await Future.delayed(Duration(seconds: delay));
+      tries++;
     }
+
     throw RateLimitException(
       'Failed to get response from GitHub API after $_maxTries tries.',
     );
@@ -155,12 +144,17 @@ class GitHubService {
       headers: {..._headers, 'Accept': 'application/vnd.github.v3.diff'},
     );
 
-    if (response.statusCode != 200) {
-      throw Exception(
-        'Failed to get pull request diff: ${response.statusCode} ${response.body}',
-      );
+    if (response.statusCode == 200) {
+      return response.body;
     }
-    return response.body;
+
+    if (response.statusCode == 406) {
+      return 'The diff was too large to be retrieved. Many files were changed.';
+    }
+
+    throw Exception(
+      'Failed to get pull request diff: ${response.statusCode} ${response.body}',
+    );
   }
 
   /// Gets a list of closed issues for a given repository and date range.

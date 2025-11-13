@@ -2,14 +2,17 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:logging/logging.dart';
 
 import 'prompts.dart';
 
-const _maxRetries = 3;
+const _maxRetries = 5;
+const _baseDelay = 30;
 
 /// A service that interacts with the Gemini API.
 class GeminiService {
   final GenerativeModel _model;
+  final _log = Logger('GeminiService');
 
   /// Creates a new instance of [GeminiService].
   GeminiService(this._model);
@@ -21,74 +24,63 @@ class GeminiService {
     );
   }
 
-  /// Gets a summary of the given text.
+  Future<GenerateContentResponse> _generateContent(List<Content> prompt) async {
+    var tries = 0;
+    late Exception lastException;
+
+    while (tries < _maxRetries) {
+      try {
+        final content = prompt;
+        return await _model.generateContent(content);
+      } on GenerativeAIException catch (e) {
+        lastException = e;
+        final delay = pow(2, tries).floor() * _baseDelay;
+        _log.warning('Retrying pull request summary in $delay seconds.');
+        await Future.delayed(Duration(seconds: delay));
+        tries++;
+      }
+    }
+
+    throw lastException;
+  }
+
   Future<String> getPullRequestSummary(
     String title,
     String body,
     String diff,
   ) async {
-    final prompt = createPullRequestSummaryPrompt(title, body, diff);
-
-    var retries = 0;
-    while (retries < _maxRetries) {
-      try {
-        final content = [Content.text(prompt)];
-        final response = await _model.generateContent(content);
-        return response.text?.trim() ?? '';
-      } catch (e) {
-        retries++;
-        if (retries >= _maxRetries) {
-          rethrow;
-        }
-        final delay = Duration(seconds: pow(2, retries).toInt());
-        await Future.delayed(delay);
-      }
+    try {
+      final prompt = createPullRequestSummaryPrompt(title, body, diff);
+      final content = [Content.text(prompt)];
+      final response = await _generateContent(content);
+      return response.text?.trim() ?? '';
+    } catch (ex) {
+      _log.severe('Failed to get pull request summary due to exception: $ex');
+      rethrow;
     }
-    throw Exception(
-      'Failed to get pull request summary after $_maxRetries retries.',
-    );
   }
 
-  /// Gets an overall summary of the given text.
   Future<String> getOverallSummary(String prs, String issues) async {
-    final prompt = createOverallSummaryPrompt(prs, issues);
-
-    var retries = 0;
-    while (retries < _maxRetries) {
-      try {
-        final content = [Content.text(prompt)];
-        final response = await _model.generateContent(content);
-        return response.text?.trim() ?? '';
-      } catch (e) {
-        retries++;
-        if (retries >= _maxRetries) {
-          rethrow;
-        }
-        final delay = Duration(seconds: pow(2, retries).toInt());
-        await Future.delayed(delay);
-      }
+    try {
+      final prompt = createOverallSummaryPrompt(prs, issues);
+      final content = [Content.text(prompt)];
+      final response = await _generateContent(content);
+      return response.text?.trim() ?? '';
+    } catch (ex) {
+      _log.severe('Failed to get overall summary due to exception: $ex');
+      rethrow;
     }
-    throw Exception('Failed to get summary after $_maxRetries retries.');
   }
 
   Future<String> summarizeMultiReport(String summaries) async {
-    final prompt = createMultiReportSummaryPrompt(summaries);
-
-    var retries = 0;
-    while (retries < _maxRetries) {
-      try {
-        final content = [Content.text(prompt)];
-        final response = await _model.generateContent(content);
-        return response.text?.trim() ?? '';
-      } catch (e) {
-        retries++;
-        if (retries >= _maxRetries) {
-          rethrow;
-        }
-        final delay = Duration(seconds: pow(2, retries).toInt());
-        await Future.delayed(delay);
-      }
+    try {
+      final prompt = createMultiReportSummaryPrompt(summaries);
+      final content = [Content.text(prompt)];
+      final response = await _generateContent(content);
+      return response.text?.trim() ?? '';
+    } catch (ex) {
+      _log.severe('Failed to get multi-repo summary due to exception: $ex');
+      rethrow;
     }
-    throw Exception('Failed to get summary after $_maxRetries retries.');
   }
 }
