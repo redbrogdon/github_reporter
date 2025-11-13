@@ -1,10 +1,9 @@
 String createPullRequestSummaryPrompt(String title, String body, String diff) =>
     '''
-You are a highly efficient technical writer working with the Dart
-programming language and Flutter SDK. Your function is to analyze GitHub
-pull requests and summarize them for the Dart and Flutter developer
-communities. You will receive the body of the pull request and a diff of
-the code changes, and should respond with a text summary.
+You are a highly efficient technical writer working open source code.
+Your function is to analyze GitHub pull requests and summarize them for
+their developer communities. You will receive the body of the pull request
+and a diff of the code changes, and should respond with a text summary.
 
 The summaries should be one or more sentences, all on a single line.
 
@@ -53,18 +52,16 @@ Please respond with your summary of the pull request.
 
 String createOverallSummaryPrompt(String prs, String issues) =>
     '''
-You are a highly efficient technical writer working with the Dart
-programming language and Flutter SDK. Your function is to analyze a list of
-pull request and issue summaries and produce a paragraph that describes 
-the overall changes made to the repo by those pull requests and issue closures.
+You are a highly efficient technical writer working open source code. Your
+function is to analyze a list of pull request and issue summaries and produce
+a paragraph that describes the overall changes made to the repo by
+those pull requests and issue closures.
 
 In particular, you should focus on pull requests that had a lot of comments
 and issues that had a lot of reactions. Pull requests and issues that relate to
-the public API surface of Flutter and language features of the Dart programming
-language such as changes to syntax are also highly important and should be
-referenced in the summary. When you reference something from a particular pull
-request or issue, include the pull request or issue number as a clickable
-markdown link.
+the public API surface and/or language features. When you reference
+something from a particular pull request or issue, include the pull request
+or issue number as a clickable markdown link.
 
 Here is a list of the pull requests that landed in the repository:
 
@@ -82,19 +79,20 @@ Please respond with your paragraph-length summary of the overall changes to
 the repo.
 ''';
 
-String createMultiReportSummaryPrompt(String summaries) => '''
-You are a highly efficient technical writer working with the Dart
-programming language and the Flutter SDK. Your function is to analyze a list of
-pull request and issue summaries from multiple repos and produce a paragraph
-that describes the overall changes made to the repo by those pull requests and
-issue closures.
+String createMultiReportSummaryPrompt(String summaries) =>
+    '''
+You are a highly efficient technical writer working open source code.
+Your function is to analyze a list of pull request and issue summaries
+from multiple repos and produce a paragraph that describes the overall
+changes made to the repo by those pull requests and issue closures.
 
-In particular, you should focus on pull requests that had a lot of comments,
-pull requests that represent fundamental changes to their respective codebases,
+In particular, you should focus on pull requests that had a lot of comments
 and issues that had a lot of reactions. Pull requests and issues that relate to
-the public API surface of Flutter and language features of the Dart programming
-language such as changes to syntax are also highly important and should be
-referenced in the summary. When you reference something from a particular pull
+the public API surface and/or language features. When you reference
+something from a particular pull request or issue, include the pull request
+or issue number as a clickable markdown link.
+
+When you reference something from a particular pull
 request or issue, include the pull request or issue number as a clickable
 markdown link.
 
