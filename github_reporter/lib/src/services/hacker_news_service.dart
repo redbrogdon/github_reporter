@@ -4,7 +4,6 @@ import 'dart:math';
 
 import 'package:http/http.dart' as http;
 
-import '../models/comment.dart';
 import '../models/story.dart';
 
 const int _maxRetries = 3;
@@ -26,12 +25,6 @@ class HackerNewsService {
     final url = '$baseUrl/item/$id.json';
     final response = await _getWithRetry(url);
     return Story.fromJson(jsonDecode(response));
-  }
-
-  Future<Comment> getComment(int id) async {
-    final url = '$baseUrl/item/$id.json';
-    final response = await _getWithRetry(url);
-    return Comment.fromJson(jsonDecode(response));
   }
 
   Future<String> _getWithRetry(String url) async {

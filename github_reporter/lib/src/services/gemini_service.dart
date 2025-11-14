@@ -83,4 +83,18 @@ class GeminiService {
       rethrow;
     }
   }
+
+  Future<String> summarizeHackerNewsText(String summaries) async {
+    try {
+      final prompt = createHackerNewsSummaryPrompt(summaries);
+      final content = [Content.text(prompt)];
+      final response = await _generateContent(content);
+      return response.text?.trim() ?? '';
+    } catch (ex) {
+      _log.severe(
+        'Failed to get Hacker News text summary due to exception: $ex',
+      );
+      rethrow;
+    }
+  }
 }

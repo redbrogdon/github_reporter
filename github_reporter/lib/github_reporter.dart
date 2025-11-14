@@ -56,8 +56,9 @@ class ReportGenerator {
       individualReports.add(report);
     }
 
-    final multiReportSummary =
-        await _geminiService.summarizeMultiReport(individualReports.join('\n\n'));
+    final multiReportSummary = await _geminiService.summarizeMultiReport(
+      individualReports.join('\n\n'),
+    );
 
     final hackerNewsSection = skipHackerNews
         ? ''
@@ -180,20 +181,31 @@ class ReportGenerator {
     final hnBuffer = StringBuffer();
     hnBuffer.writeln('## Top Hacker News Stories\n');
     try {
-      final topStoryIds = await _hackerNewsService.getTopStoryIds();
-      final top5StoryIds = topStoryIds.take(25);
+      final ids = (await _hackerNewsService.getTopStoryIds()).take(25);
 
-      for (final id in top5StoryIds) {
+      for (final id in ids) {
         final story = await _hackerNewsService.getStory(id);
+
         hnBuffer.writeln(
-          '### [${story.title ?? 'No title'}](${story.url ?? ''})',
+          '### ${_getHackerNewsScoreEmojis(story.score)} '
+          '\[${story.score}\] '
+          '[${story.title ?? 'No title'}](${story.url ?? ''})',
         );
+
         hnBuffer.writeln(
           '* **Author:** [${story.by}]'
           '(https://news.ycombinator.com/user?id=${story.by}) | '
-          '**Score:** ${story.score} | **Comments:** [${story.descendants}]'
+          '**Comments:** [${story.descendants}]'
           '(https://news.ycombinator.com/item?id=${story.id})',
         );
+
+        final text = story.text;
+
+        if (text != null && text.isNotEmpty) {
+          hnBuffer.write('* ');
+          hnBuffer.writeln(await _geminiService.summarizeHackerNewsText(text));
+        }
+
         hnBuffer.writeln('');
       }
     } catch (e) {
@@ -203,6 +215,13 @@ class ReportGenerator {
 
     return hnBuffer.toString();
   }
+
+  String _getHackerNewsScoreEmojis(int? score) => switch (score) {
+    null || < 100 => '',
+    < 250 => '🔥',
+    < 600 => '🔥🔥',
+    _ => '🔥🔥🔥',
+  };
 
   String _getReactionEmojis(Reactions reactions) {
     final emojis = <String>[];
@@ -257,7 +276,9 @@ class ReportGenerator {
     if (dateTime == null) {
       return 'N/A';
     }
-    final pacificTime = dateTime.toUtc().subtract(const Duration(hours: 8)); // UTC-8 for Pacific Time
+    final pacificTime = dateTime.toUtc().subtract(
+      const Duration(hours: 8),
+    ); // UTC-8 for Pacific Time
     return DateFormat('yyyy-MM-dd hh:mm a').format(pacificTime);
   }
 }

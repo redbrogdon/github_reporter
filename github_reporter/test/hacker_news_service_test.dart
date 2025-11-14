@@ -54,26 +54,5 @@ void main() {
       expect(story.id, 1);
       expect(story.title, 'Test Story');
     });
-
-    test('getComment returns a comment', () async {
-      final commentJson = '''
-        {
-          "id": 1,
-          "by": "testuser",
-          "kids": [],
-          "parent": 2,
-          "text": "This is a test comment.",
-          "time": 1672531200,
-          "type": "comment"
-        }
-      ''';
-      final response = http.Response(commentJson, 200);
-      when(() => mockHttpClient.get(any())).thenAnswer((_) async => response);
-
-      final comment = await service.getComment(1);
-
-      expect(comment.id, 1);
-      expect(comment.text, 'This is a test comment.');
-    });
   });
 }

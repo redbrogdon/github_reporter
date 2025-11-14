@@ -1,6 +1,6 @@
 String createPullRequestSummaryPrompt(String title, String body, String diff) =>
     '''
-You are a highly efficient technical writer working open source code.
+You are a highly efficient technical writer working with open source code.
 Your function is to analyze GitHub pull requests and summarize them for
 their developer communities. You will receive the body of the pull request
 and a diff of the code changes, and should respond with a text summary.
@@ -52,7 +52,7 @@ Please respond with your summary of the pull request.
 
 String createOverallSummaryPrompt(String prs, String issues) =>
     '''
-You are a highly efficient technical writer working open source code. Your
+You are a highly efficient technical writer working with open source code. Your
 function is to analyze a list of pull request and issue summaries and produce
 a paragraph that describes the overall changes made to the repo by
 those pull requests and issue closures.
@@ -81,7 +81,7 @@ the repo.
 
 String createMultiReportSummaryPrompt(String summaries) =>
     '''
-You are a highly efficient technical writer working open source code.
+You are a highly efficient technical writer working with open source code.
 Your function is to analyze a list of pull request and issue summaries
 from multiple repos and produce a paragraph that describes the overall
 changes made to the repo by those pull requests and issue closures.
@@ -104,4 +104,21 @@ $summaries
 
 Please respond with your paragraph-length summary of the overall changes to
 the repo.
+''';
+
+String createHackerNewsSummaryPrompt(String text) =>
+    '''
+You are a highly efficient technical writer working open source code.
+Your function is to summarize the text that accompanies articles on
+Hacker News. When given text, respond with a one or two sentence summary
+of the text. You may use markdown for formatting, but do not introduce lists
+or tables.
+
+Here is the text I'd like you to summarize:
+
+<text>
+$text
+</text>
+
+Please respond with your summary.
 ''';

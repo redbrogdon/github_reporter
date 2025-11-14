@@ -21,6 +21,7 @@ const defaultRepos = [
   'flutter/ai',
   'flutter/codelabs',
   'flutter/flutter',
+  'flutter/genui',
   'flutter/packages',
   'flutter/samples',
   'flutter/website',

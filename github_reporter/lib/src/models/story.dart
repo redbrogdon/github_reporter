@@ -5,6 +5,7 @@ class Story {
   final List<int>? kids;
   final int? score;
   final int? time;
+  final String? text;
   final String? title;
   final String? type;
   final String? url;
@@ -16,6 +17,7 @@ class Story {
     this.kids,
     this.score,
     this.time,
+    this.text,
     this.title,
     this.type,
     this.url,
@@ -29,6 +31,7 @@ class Story {
       kids: json['kids'] != null ? List<int>.from(json['kids']) : null,
       score: json['score'],
       time: json['time'],
+      text: json['text'],
       title: json['title'],
       type: json['type'],
       url: json['url'],
