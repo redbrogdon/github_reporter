@@ -40,6 +40,8 @@ void main() {
         mergedAt: DateTime.parse('2025-01-01T12:00:00Z'),
         comments: 2,
         body: 'This is a test PR body.',
+        owner: 'owner',
+        repo: 'repo',
       );
 
       when(
@@ -87,7 +89,10 @@ void main() {
         endDate: DateTime.parse('2025-01-31'),
       );
 
-      expect(report, startsWith('# Overall Summary\nMulti-report overall summary\n\n'));
+      expect(
+        report,
+        startsWith('# Overall Summary\nMulti-report overall summary\n\n'),
+      );
       expect(report, contains('Overall test summary for single repo\n'));
       expect(report, contains('# GitHub PR Report for owner/repo'));
       expect(report, contains('## From 2025-01-01 to 2025-01-31'));
@@ -140,7 +145,10 @@ void main() {
           endDate: DateTime.parse('2025-01-31'),
         );
 
-        expect(report, startsWith('# Overall Summary\nMulti-report overall summary\n\n'));
+        expect(
+          report,
+          startsWith('# Overall Summary\nMulti-report overall summary\n\n'),
+        );
         expect(report, contains('Overall test summary for single repo\n'));
         expect(report, contains('# GitHub PR Report for owner/repo'));
         expect(report, contains('## From 2025-01-01 to 2025-01-31'));

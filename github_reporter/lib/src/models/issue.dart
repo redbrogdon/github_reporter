@@ -7,6 +7,9 @@ class Issue {
   final User user;
   final DateTime? closedAt;
   final Reactions reactions;
+  final String? body;
+  final String owner;
+  final String repo;
 
   Issue({
     required this.number,
@@ -15,9 +18,12 @@ class Issue {
     required this.user,
     this.closedAt,
     required this.reactions,
+    this.body,
+    required this.owner,
+    required this.repo,
   });
 
-  factory Issue.fromJson(Map<String, dynamic> json) {
+  factory Issue.fromJson(String owner, String repo, Map<String, dynamic> json) {
     return Issue(
       number: json['number'],
       title: json['title'],
@@ -27,6 +33,9 @@ class Issue {
           ? DateTime.parse(json['closed_at'])
           : null,
       reactions: Reactions.fromJson(json['reactions']),
+      body: json['body'],
+      owner: owner,
+      repo: repo,
     );
   }
 }

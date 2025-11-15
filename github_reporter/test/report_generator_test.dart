@@ -41,6 +41,8 @@ void main() {
         mergedAt: DateTime.parse('2025-01-01T12:00:00Z'),
         comments: 2,
         body: 'This is a test PR body.',
+        owner: 'owner',
+        repo: 'repo',
       );
 
       when(
@@ -127,6 +129,8 @@ void main() {
             rocket: 0,
             eyes: 0,
           ),
+          owner: 'owner',
+          repo: 'repo',
         );
 
         when(

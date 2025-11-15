@@ -60,6 +60,18 @@ class GeminiService {
     }
   }
 
+  Future<String> getIssueSummary(String title, String body) async {
+    try {
+      final prompt = createIssueSummaryPrompt(title, body);
+      final content = [Content.text(prompt)];
+      final response = await _generateContent(content);
+      return response.text?.trim() ?? '';
+    } catch (ex) {
+      _log.severe('Failed to get issue summary due to exception: $ex');
+      rethrow;
+    }
+  }
+
   Future<String> getOverallSummary(String prs, String issues) async {
     try {
       final prompt = createOverallSummaryPrompt(prs, issues);

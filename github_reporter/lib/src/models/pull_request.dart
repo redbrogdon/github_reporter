@@ -8,6 +8,8 @@ class PullRequest {
   final DateTime? mergedAt;
   final int comments;
   final String? body;
+  final String owner;
+  final String repo;
 
   PullRequest({
     required this.number,
@@ -17,9 +19,15 @@ class PullRequest {
     this.mergedAt,
     required this.comments,
     this.body,
+    required this.owner,
+    required this.repo,
   });
 
-  factory PullRequest.fromJson(Map<String, dynamic> json) {
+  factory PullRequest.fromJson(
+    String owner,
+    String repo,
+    Map<String, dynamic> json,
+  ) {
     return PullRequest(
       number: json['number'],
       htmlUrl: json['html_url'],
@@ -30,6 +38,8 @@ class PullRequest {
           : null,
       comments: json['comments'],
       body: json['body'],
+      owner: owner,
+      repo: repo,
     );
   }
 }

@@ -50,6 +50,29 @@ $diff
 Please respond with your summary of the pull request.
 ''';
 
+String createIssueSummaryPrompt(String title, String body) =>
+    '''
+You are a highly efficient technical writer working with open source code.
+Your function is to analyze GitHub issues and summarize them for
+their developer communities. You will receive the title and body of an
+issue, and should respond with a text summary. The summary should be one
+or more sentences, all on a single line.
+
+Here is the title of the issue:
+
+<title>
+$title
+</title>
+
+Here is the body:
+
+<description>
+$body
+</description>
+
+Please respond with your summary of the issue.
+''';
+
 String createOverallSummaryPrompt(String prs, String issues) =>
     '''
 You are a highly efficient technical writer working with open source code. Your
@@ -83,27 +106,24 @@ String createMultiReportSummaryPrompt(String summaries) =>
     '''
 You are a highly efficient technical writer working with open source code.
 Your function is to analyze a list of pull request and issue summaries
-from multiple repos and produce a paragraph that describes the overall
-changes made to the repo by those pull requests and issue closures.
+from multiple repos and produce a "highlights section" of the most impactful
+pull requests and closed issues. The list may be from zero to ten items in
+length.
 
 In particular, you should focus on pull requests that had a lot of comments
 and issues that had a lot of reactions. Pull requests and issues that relate to
-the public API surface and/or language features. When you reference
-something from a particular pull request or issue, include the pull request
-or issue number as a clickable markdown link.
+the public API surface and/or language features should also be emphasized.
 
-When you reference something from a particular pull
-request or issue, include the pull request or issue number as a clickable
-markdown link.
+Create your "highlights section" by copying (**without changing any of the 
+text**) the summaries for the items you've chosen into a list.
 
-Here is a list of the summaries from each repository:
+Here are the summaries:
 
 <summaries>
 $summaries
 </summaries>
 
-Please respond with your paragraph-length summary of the overall changes to
-the repo.
+Please respond with your highlights section.
 ''';
 
 String createHackerNewsSummaryPrompt(String text) =>

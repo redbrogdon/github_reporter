@@ -117,7 +117,9 @@ class GitHubService {
         );
       }
 
-      pullRequests.add(PullRequest.fromJson(jsonDecode(prResponse.body)));
+      pullRequests.add(
+        PullRequest.fromJson(owner, repo, jsonDecode(prResponse.body)),
+      );
     }
 
     return pullRequests;
@@ -184,6 +186,6 @@ class GitHubService {
     final searchResult = jsonDecode(searchResponse.body);
     final issues = searchResult['items'] as List;
 
-    return issues.map((issue) => Issue.fromJson(issue)).toList();
+    return issues.map((issue) => Issue.fromJson(owner, repo, issue)).toList();
   }
 }

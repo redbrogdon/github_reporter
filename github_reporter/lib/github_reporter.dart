@@ -139,7 +139,7 @@ class ReportGenerator {
 * **Author:** [${pr.user.login}](${pr.user.htmlUrl})
 * **Merged At:** ${_formatDateTime(pr.mergedAt)}
 * **Comments:** ${pr.comments}
-* **Summary:** $summary
+* $summary
 ''');
       }
     }
@@ -154,7 +154,6 @@ class ReportGenerator {
         issueBuffer.write('''
 ### [Issue #${issue.number}](${issue.htmlUrl}): ${issue.title}
 * **Author:** [${issue.user.login}](${issue.user.htmlUrl})
-* **Closed At:** ${_formatDateTime(issue.closedAt)}
 ''');
         if (issue.reactions.totalCount > 0) {
           issueBuffer.writeln(
@@ -162,6 +161,14 @@ class ReportGenerator {
             '**${issue.reactions.totalCount}** -- '
             '${_getReactionEmojis(issue.reactions)}',
           );
+        }
+
+        if (issue.body?.isNotEmpty ?? false) {
+          final summary = await _geminiService.getIssueSummary(
+            issue.title,
+            issue.body ?? '',
+          );
+          issueBuffer.writeln('* $summary');
         }
 
         issueBuffer.writeln();
@@ -187,8 +194,7 @@ class ReportGenerator {
         final story = await _hackerNewsService.getStory(id);
 
         hnBuffer.writeln(
-          '### ${_getHackerNewsScoreEmojis(story.score)} '
-          '\[${story.score}\] '
+          '### ${story.score} ${_getHackerNewsScoreEmojis(story.score)} '
           '[${story.title ?? 'No title'}](${story.url ?? ''})',
         );
 
