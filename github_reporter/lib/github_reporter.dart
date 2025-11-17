@@ -97,7 +97,7 @@ class ReportGenerator {
 
     _log.info('Found ${pullRequests.length} merged pull requests.');
 
-    final closedIssues = await _githubService.getClosedIssues(
+    final closedIssues = await _githubService.getCompletedIssues(
       owner: owner,
       repo: repo,
       startDate: startDate,

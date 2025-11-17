@@ -159,15 +159,15 @@ class GitHubService {
     );
   }
 
-  /// Gets a list of closed issues for a given repository and date range.
-  Future<List<Issue>> getClosedIssues({
+  /// Gets a list of completed issues for a given repository and date range.
+  Future<List<Issue>> getCompletedIssues({
     required String owner,
     required String repo,
     required DateTime startDate,
     required DateTime endDate,
   }) async {
     final query =
-        'repo:$owner/$repo is:issue is:closed '
+        'repo:$owner/$repo is:issue is:closed reason:completed '
         'closed:${_formatDate(startDate)}..${_formatDate(endDate)}';
 
     _log.info('Making GitHub API request: search issues with query "$query"');

@@ -107,7 +107,7 @@ void main() {
       final startDate = DateTime.parse('2025-01-01');
       final endDate = DateTime.parse('2025-01-31');
 
-      final result = await gitHubService.getClosedIssues(
+      final result = await gitHubService.getCompletedIssues(
         owner: 'owner',
         repo: 'repo',
         startDate: startDate,

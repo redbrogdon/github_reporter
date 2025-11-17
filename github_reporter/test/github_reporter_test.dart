@@ -55,7 +55,7 @@ void main() {
       ).thenAnswer((_) async => [pr]);
 
       when(
-        () => mockGitHubService.getClosedIssues(
+        () => mockGitHubService.getCompletedIssues(
           owner: any(named: 'owner'),
           repo: any(named: 'repo'),
           startDate: any(named: 'startDate'),
@@ -123,7 +123,7 @@ void main() {
         ).thenAnswer((_) async => []);
 
         when(
-          () => mockGitHubService.getClosedIssues(
+          () => mockGitHubService.getCompletedIssues(
             owner: any(named: 'owner'),
             repo: any(named: 'repo'),
             startDate: any(named: 'startDate'),
