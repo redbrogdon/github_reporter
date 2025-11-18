@@ -57,7 +57,7 @@ class GitHubService {
       }
 
       final delay = pow(2, tries).floor() * _baseDelay;
-      _log.warning('Rate limit exceeded. Retrying in $delay seconds...');
+      _log.warning('GitHub Rate limit exceeded. Retrying in $delay seconds...');
       await Future.delayed(Duration(seconds: delay));
       tries++;
     }

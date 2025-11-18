@@ -20,7 +20,7 @@ class GeminiService {
   /// Creates a new instance of [GeminiService] using a Gemini API key.
   factory GeminiService.withApiKey(String apiKey) {
     return GeminiService(
-      GenerativeModel(model: 'gemini-2.5-pro', apiKey: apiKey),
+      GenerativeModel(model: 'gemini-3-pro-preview', apiKey: apiKey),
     );
   }
 
