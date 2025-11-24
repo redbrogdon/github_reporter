@@ -1,26 +1,4 @@
-# GitHub PR Reporter
-
-A command-line application to generate reports on pull requests for a GitHub repository over a specified period using the Gemini API for analysis.
-
-## Prerequisites
-
-*   Dart SDK
-*   GitHub Personal Access Token
-*   Gemini API Key
-
-## Installation
-
-1.  Clone the repository:
-    ```bash
-    git clone <repository-url>
-    cd github_pr_reporter
-    ```
-2.  Install dependencies:
-    ```bash
-    dart pub get
-    ```
-
-## Usage
+# Usage
 
 A command-line tool to generate a summary report of GitHub repository activity using GitHub and Gemini APIs.
 
