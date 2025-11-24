@@ -1,6 +1,9 @@
 # GitHub PR Reporter
 
-A command-line application to generate reports on pull requests for a GitHub repository over a specified period using the Gemini API for analysis.
+A command-line application to generate reports on pull requests for a GitHub
+repository over a specified period using the Gemini API for analysis.
+
+This is a work for progress, so you can expect the codebase to change wildly
 
 ## Prerequisites
 
@@ -26,4 +29,9 @@ A command-line application to generate reports on pull requests for a GitHub rep
 dart run github_reporter.dart --repo <owner/repo> --github-token <YOUR_GITHUB_PAT> --gemini-key <YOUR_GEMINI_API_KEY> [--start-date <YYYY-MM-DD>] [--end-date <YYYY-MM-DD>] [--exclude-author <GITHUB_HANDLE>]
 ```
 
-For info on how to use this tool, see [USAGE.md](./USAGE.md).
+For more info on how to use this tool, see [USAGE.md](./USAGE.md).
+
+## Reports
+
+This tool is being run daily for the default repos, with new reports arriving
+in the [reports](./reports) folder.
