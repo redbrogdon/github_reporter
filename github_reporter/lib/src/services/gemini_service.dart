@@ -20,7 +20,7 @@ class GeminiService {
   /// Creates a new instance of [GeminiService] using a Gemini API key.
   factory GeminiService.withApiKey(String apiKey) {
     return GeminiService(
-      GenerativeModel(model: 'gemini-2.5-pro', apiKey: apiKey),
+      GenerativeModel(model: 'gemini-2.5-flash', apiKey: apiKey),
     );
   }
 
@@ -35,7 +35,7 @@ class GeminiService {
       } on GenerativeAIException catch (e) {
         lastException = e;
         final delay = pow(2, tries).floor() * _baseDelay;
-        _log.warning('Retrying pull request summary in $delay seconds.');
+        _log.warning('Retrying _generateContent in $delay seconds.');
         await Future.delayed(Duration(seconds: delay));
         tries++;
       }

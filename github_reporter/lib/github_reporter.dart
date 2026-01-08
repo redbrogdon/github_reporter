@@ -122,11 +122,15 @@ class ReportGenerator {
       for (final pr in pullRequests) {
         _log.info('Generating summary for PR #${pr.number}...');
 
-        final diff = await _githubService.getPullRequestDiff(
+        var diff = await _githubService.getPullRequestDiff(
           owner: owner,
           repo: repo,
           number: pr.number,
         );
+
+        if (diff.length > 100_000) {
+          diff = diff.substring(0, 100_000);
+        }
 
         final summary = await _geminiService.getPullRequestSummary(
           pr.title,
