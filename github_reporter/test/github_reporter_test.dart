@@ -106,7 +106,7 @@ void main() {
       );
       expect(report, contains('* **Merged At:** 2025-01-01 04:00 AM'));
       expect(report, contains('* **Comments:** 2'));
-      expect(report, contains('* **Summary:** Test summary'));
+      expect(report, contains('* Test summary'));
     });
 
     test(

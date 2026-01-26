@@ -178,19 +178,23 @@ void main(List<String> arguments) async {
       geminiApiKey: geminiApiKey,
     );
 
-    final report = await generator.generateReport(
-      repoSlugs: repos,
-      startDate: startDate,
-      endDate: endDate,
-      excludedAuthors: excludeAuthors,
-      skipHackerNews: noHackerNews,
-    );
+    try {
+      final report = await generator.generateReport(
+        repoSlugs: repos,
+        startDate: startDate,
+        endDate: endDate,
+        excludedAuthors: excludeAuthors,
+        skipHackerNews: noHackerNews,
+      );
 
-    if (outputFile != null) {
-      await File(outputFile).writeAsString(report);
-      log.info('Report written to $outputFile');
-    } else {
-      print(report);
+      if (outputFile != null) {
+        await File(outputFile).writeAsString(report);
+        log.info('Report written to $outputFile');
+      } else {
+        print(report);
+      }
+    } finally {
+      generator.dispose();
     }
   } on RateLimitException catch (e) {
     log.severe(e.message);

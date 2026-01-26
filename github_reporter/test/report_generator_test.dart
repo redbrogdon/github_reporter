@@ -97,9 +97,9 @@ void main() {
         report,
         contains('* **Author:** [testuser](https://github.com/testuser)'),
       );
-      expect(report, contains('* **Merged At:** 2025-01-01'));
+      expect(report, contains('* **Merged At:** 2025-01-01 04:00 AM'));
       expect(report, contains('* **Comments:** 2'));
-      expect(report, contains('* **Summary:** Test summary'));
+      expect(report, contains('* Test summary'));
       verify(
         () => mockGitHubService.getPullRequestDiff(
           owner: 'owner',

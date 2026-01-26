@@ -182,3 +182,4 @@ This document outlines the steps to implement the GitHub PR Reporter application
 -   **2025-11-06:** Implemented clickable pull request IDs and Pacific Time formatting for `Merged At` times in the report.
 -   **2025-11-06:** Made the author's name in the report a clickable link to their GitHub profile.
 -   **2025-11-11:** Added the `summarizeMultiReport` method to `GeminiService` and the `createMultiReportSummaryPrompt` to `prompts.dart` to support summarizing summaries from multiple reports.
+*   **2026-01-22:** Fixed an issue where the application would hang after execution by properly disposing of `http.Client` instances in `GitHubService` and `HackerNewsService`.

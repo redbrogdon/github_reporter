@@ -291,4 +291,10 @@ class ReportGenerator {
     ); // UTC-8 for Pacific Time
     return DateFormat('yyyy-MM-dd hh:mm a').format(pacificTime);
   }
+
+  /// Closes the underlying services.
+  void dispose() {
+    _githubService.dispose();
+    _hackerNewsService.dispose();
+  }
 }

@@ -48,4 +48,9 @@ class HackerNewsService {
     }
     throw Exception('Failed to get data after $_maxRetries retries.');
   }
+
+  /// Closes the underlying HTTP client.
+  void dispose() {
+    _client.close();
+  }
 }

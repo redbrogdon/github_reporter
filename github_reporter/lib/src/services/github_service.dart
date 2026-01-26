@@ -188,4 +188,9 @@ class GitHubService {
 
     return issues.map((issue) => Issue.fromJson(owner, repo, issue)).toList();
   }
+
+  /// Closes the underlying HTTP client.
+  void dispose() {
+    _client.close();
+  }
 }
